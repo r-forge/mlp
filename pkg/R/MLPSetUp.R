@@ -70,7 +70,7 @@ f.GOInputMLP <- function(x=go.eSet){
       })
   out <- do.call(rbind, out)
   out <- as.data.frame(out, stringsAsFactors = FALSE)
-  out <- out[!is.na(out[,2]),]
+  out <- out[!is.na(out[,2]), ]
   colnames(out) <- c('GO', 'Gene.ID')
   out[,1] <- sub('GO:', '', out[,1])
   out[,1] <- as.numeric(out[,1])
