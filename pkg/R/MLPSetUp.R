@@ -56,14 +56,12 @@ f.GOAnnotation <- function(Org="Mouse", Onto="BP", fNames=fNames, nMin=5,nMax=10
 }
 
 
-f.GOInputMLP <- function(x=go.eSet){
+f.GOInputMLP <- function(x = go.eSet){
   
   ###Authors: An De Bondt, Tine Casneuf, Nandini Raghavan.
   ###This code converts the output of f.GOAnnotation to the necessary format for input for MLP analysis.
   
   ###Input: go.eSet output from f.GOAnnotation.
-  
-  
   out <- lapply(names(go.eSet), function(goid) {
         i.genes <- unique(go.eSet[[goid]])
         matrix(c(rep(x = goid, times = length(i.genes)), i.genes), ncol = 2, byrow = FALSE)
@@ -72,11 +70,11 @@ f.GOInputMLP <- function(x=go.eSet){
   out <- as.data.frame(out, stringsAsFactors = FALSE)
   out <- out[!is.na(out[,2]), ]
   colnames(out) <- c('GO', 'Gene.ID')
-  out[,1] <- sub('GO:', '', out[,1])
-  out[,1] <- as.numeric(out[,1])
-  out[,2] <- as.numeric(out[,2])
+  out[, 1] <- sub('GO:', '', out[, 1])
+  out[, 1] <- as.numeric(out[, 1])
+  out[, 2] <- as.numeric(out[, 2])
   out <- unique(out)
-  out <- as.matrix(out) ###listed as a matrix as needed for ML
+  out <- as.matrix(out) ### listed as a matrix as needed for ML
   return(out)
   
 }
