@@ -19,6 +19,10 @@
 
 ###====================== MLP STATISTIC ========================
 
+#' Compute the column means of -log10(x)
+#' @param x numeric matrix
+#' @return vector with the column means of -log10(x) 
+#' @export
 f.u <- function(x){ 
   colMeans(-log10(x)) 
 }
@@ -347,22 +351,19 @@ f.cut0 <- function(w0, w){
 #}
 
 #' function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size
-#' @param w0 vector of observed gene set statistics
-#' TODO rename to observedGenesetStats
-#' @param w matrix of gene set statistics based on the permutation procedure
-#' TODO rename to permutationGenesetStats
-#' @param q.cutoff vector of quantiles at which p values for each gene set are desired (to be
+#' @param observedGenesetStats vector of observed gene set statistics
+#' @param permutationGenesetStats matrix of gene set statistics based on the permutation procedure
+#' @param criticalValuesGeneset vector of quantiles at which p values for each gene set are desired (to be
 #'   specified by the users)
-#' TODO rename to criticalValuesGeneset  
 #' @return vector of p values for each gene set
 #' @export
-f.cut2 <- function(w0, w, q.cutoff){
+f.cut2 <- function(observedGenesetStats, permutationGenesetStats, criticalValuesGeneset){
   ### This imposes the decreasing criterion and has df =9
   ### SMOOTHED CUTOFFS :Uses f.ee, f.ctpval and related functions from Javier's code. 
-  w1 <- cbind(rep(w0[,1], ncol(w[,])), as.vector(w[,]))
-  lqi = NULL; hqi= q.cutoff
+  w1 <- cbind(rep(observedGenesetStats[,1], ncol(permutationGenesetStats[,])), as.vector(permutationGenesetStats[,]))
+  lqi = NULL; hqi= criticalValuesGeneset
   ### work <- f.ee1(x=sqrt(w1[,1]), y=w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = F, plot = T, flag = F, dg = 15, logtran = F)
-  work <- f.ee1(x = sqrt(w1[,1]), y = w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = FALSE, plot = TRUE, flag = FALSE, dg = 9, logtran = FALSE)
+  work <- f.ee1(x = sqrt(w1[,1]), y = w1[,2], x0 = sqrt(observedGenesetStats[,1]), y0 = observedGenesetStats[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = FALSE, plot = TRUE, flag = FALSE, dg = 9, logtran = FALSE)
   pval <- f.ctpval1(work, nch=6)
   rm(work)
   return(pval)
@@ -499,11 +500,15 @@ f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, 
   cbind(T = c(y0), xtp, Sp=x0)
 }
 
-f.smdecreasing1 = function(z, w, decreasing=TRUE) {
-# z ourput of smooth.spline with x component sorted.
-# The y component of z must be non increasing, if not the 
-#    function willmake it non-increasing
-# Extrapolations are linear
+#' TODO role of function; the extrapolations are linear
+#' @param z output of smooth.spline with x component sorted; the
+#'    y component of z must be non increasing, if not the 
+#'    function will make it non-increasing
+#' @param w TODO
+#' @param decreasing indicator variable TODO 
+#' @return 
+#' @export
+f.smdecreasing1 <- function(z, w, decreasing=TRUE) {
   x <- z$x
   if(decreasing) y <- z$y else y <- (-z$y)
   rx <- range(x)
@@ -527,18 +532,24 @@ f.smdecreasing1 = function(z, w, decreasing=TRUE) {
   if (decreasing) w1 else -w1
 }
 
+#' column sorting function
 f.csort <- function(x) { 
   n  <- nrow(x)
   p  <- ncol(x)
   rx <- range(x)
-  z  <- (x - rx[1])/(rx[2]-rx[1])*0.99
+  z  <- (x - rx[1]) / (rx[2]-rx[1]) * 0.99
   k <- rep(1:p,rep(n,p))
-  z  <- x[sort.list( z + k)]
+  z  <- x[sort.list(z + k)]
   dim(z) <- dim(x)
   z
 }
 
-f.ctpval1 = function(x.ct,nch=6) {
+#' TODO role of function
+#' @param x.ct 
+#' @param nch 
+#' @return 
+#' @export
+f.ctpval1 <- function(x.ct, nch=6) {
   p <- ncol(x.ct) 
   pr <- 2:(p-1)
   x <- log(x.ct[,pr])
@@ -551,12 +562,17 @@ f.ctpval1 = function(x.ct,nch=6) {
   xy <- (x-xm)%*%(y-mean(y))
   b <- xy / x2
   m <- mean(y) - b*xm
-  exp(-exp(m + b*log(abs(x.ct[,1]))))
+  
+  res <- exp(-exp(m + b*log(abs(x.ct[,1]))))
+  return(res)
 }
 
 
 ###==================================SIMULATION========================
 
+#' TODO add detail This function generates p values for each gene set using either row permutatoins
+#' of the gene pvalues or column permutations of the expression matrix; it can
+#' generate individual gen set p values or smoothed geneset p values 
 #' @param x is the input (numeric) table of gene-sets and gene-ids. (GO category and Gene ID)
 #'   matrix --> should become a list: numeric -> character matrix (-> list later on)
 #' @param y is the input (numeric) table of gene-ids and pvalues (or other summary statistic).
