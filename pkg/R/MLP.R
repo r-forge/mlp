@@ -41,7 +41,7 @@ f.mlp0 <- function(geneSet, genePValue, mappingFunctionOutput){
 #' @param y2x 
 #' @return TODO 
 #' @export
-f.mlp <- function(inputData, y, y2x){
+f.mlpStatistic <- function(inputData, y, y2x){
   ###This function calculates the mean of the gene-statistic y[,2] for each unique gene-set in x[,1].
   ### inputData is the input table of gene-sets and gene-names.
   ### y is the input table of gene-names and gene-statistics.
@@ -358,14 +358,16 @@ f.cut2 <- function(w0, w, q.cutoff){
   return(pval)
 }
 
-#'
+#' TODO
 #' @param x
 #' @param y
 #' @param x0
 #' @param y0
 #' @param type one of "none", "dec" or "inc"
 #' @param m defaults
-#' @param 
+#' @param
+#' @return 
+#' @export 
 f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
     sym = FALSE, plot = TRUE, flag = FALSE, dg = 15, logtran = FALSE) {
 #  x, y are the coordinates of the points used to generate the
@@ -489,8 +491,8 @@ f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, 
   cbind(T = c(y0), xtp, Sp=x0)
 }
 
-f.smdecreasing1 = function(z, w, decreasing=TRUE) {
-# z ourput of smooth.spline with x component sorted.
+f.smdecreasing1 <- function(z, w, decreasing=TRUE) {
+# z output of smooth.spline with x component sorted.
 # The y component of z must be non increasing, if not the 
 #    function willmake it non-increasing
 # Extrapolations are linear
@@ -528,7 +530,7 @@ f.csort <- function(x) {
   z
 }
 
-f.ctpval1 = function(x.ct,nch=6) {
+f.ctpval1 <- function(x.ct,nch=6) {
   p <- ncol(x.ct) 
   pr <- 2:(p-1)
   x <- log(x.ct[,pr])
@@ -547,67 +549,72 @@ f.ctpval1 = function(x.ct,nch=6) {
 
 ###==================================SIMULATION========================
 
-#' @param x is the input (numeric) table of gene-sets and gene-ids. (GO category and Gene ID)
-#'   matrix --> should become a list: numeric -> character matrix (-> list later on)
-#' @param y is the input (numeric) table of gene-ids and pvalues (or other summary statistic).
-#' @param nmin minimum number of genes in a gene set for it to be considered (lower threshold
+#' This function calculates p-values for each gene set based on row permutations
+#' of the gene p values or column permutations of the expression matrix; the p values
+#' can be obtained either as individual gene set p values or p values based on smoothing
+#' across gene sets of similar size.
+#' @param geneSet is the input table (two-column numeric matrix) of gene-sets and gene-ids. (GO category and Gene ID)
+#'   TODO matrix --> should become a list: numeric -> character matrix (-> list later on)
+#' @param genePValue is the input table (two-column numeric matrix) of gene-ids and pvalues (or other summary statistic).
+#' TODO gene-ids consistent with gene ID's in x (i.e. character vector)
+#' @param minGenes minimum number of genes in a gene set for it to be considered (lower threshold
 #'    for gene set size)
-#' @param nmax maximum number of genes in a gene set for it to be considered (upper threshold
+#' @param maxGenes maximum number of genes in a gene set for it to be considered (upper threshold
 #'    for gene set size)
-#' @param ind.sim logical indicating whether to use row permutations (TRUE; default) or column 
+#' @param rowPermutations logical indicating whether to use row permutations (TRUE; default) or column 
 #'    permutations (FALSE) 
-#' @param nsim is the number of simulations.
-#' @param ind.smooth logical indicating whether one wants to calculate smoothed cut-off thresholds (TRUE; default)
+#' @param nPermutations is the number of simulations.
+#' @param smoothPValues logical indicating whether one wants to calculate smoothed cut-off thresholds (TRUE; default)
 #'    or not (FALSE).
 #' @return data frame with three columns: genesetSize, genesetStatistic and genesetPValue.
+#' @references TODO
 #' @export
-f.GOFiSH <- function(x, y, nmin = 5, nmax = 100, ind.sim = TRUE, nsim = 10, ind.smooth = TRUE){
+f.MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 10, smoothPValues = TRUE){
   
-  if (!is.numeric(x)){
+  if (!is.numeric(geneSet)){
     warning("Input x should be numeric")
-    x <- f.toarray(x)
+    geneSet <- f.toarray(geneSet)
   }
-  if (!is.numeric(y)){
+  if (!is.numeric(genePValue)){
     warning("Input y should be numeric")
-    y <- f.toarray(y)
+    genePValue <- f.toarray(genePValue)
   }
   
-  
-  if (!ind.sim){
-    nsim <- ncol(y)-2
+  if (!rowPermutations){
+    nPermutations <- ncol(genePValue)-2
   }
   
   ### Remove missing values from x and y.
-  y <- y[!is.na(y[,2]), ]
-  y2x <- f.y2x(x[,2], y[,1])
-  x <- x[!is.na(y2x), ]
-  y2x <- f.y2x(x[,2], y[,1])
+  genePValue <- genePValue[!is.na(genePValue[,2]), ]
+  y2x <- f.y2x(geneSet[,2], genePValue[,1])
+  geneSet <- geneSet[!is.na(y2x), ]
+  y2x <- f.y2x(geneSet[,2], genePValue[,1])
   
-  n1 <- length(unique(x[,1]))
-  n2 <- nrow(y)
+  n1 <- length(unique(geneSet[,1]))
+  n2 <- nrow(genePValue)
   
-  w0 <- f.mlp0(x,y[,1:2],y2x)
-  i <- ((w0[,1] <= nmax) & (w0[,1] >= nmin))
+  w0 <- f.mlp0(geneSet,genePValue[,1:2],y2x)
+  i <- ((w0[,1] <= maxGenes) & (w0[,1] >= minGenes))
   # Only relevant rows of x to reduce downstream computations.
-  ix   <- i[match(x[,1],names(i))]
-  y2xi <- f.y2x(x[ix,2],y[,1])
-  n11 <- length(unique(x[ix,1]))
+  ix   <- i[match(geneSet[,1],names(i))]
+  y2xi <- f.y2x(geneSet[ix,2],genePValue[,1])
+  n11 <- length(unique(geneSet[ix,1]))
   
   ### Create simulation data:
-  if (!ind.sim){
+  if (!rowPermutations){
     ### Column Permutations
-    w <- f.mlp(x[ix,], y[,-2], y2xi)[,-1]
+    w <- f.mlpStatistic(geneSet[ix,], genePValue[,-2], y2xi)[,-1]
   } else {
     ### Row Permutations
-    p1 <- apply(matrix(1:n2,n2,nsim),2,sample) ##need "matrix" to resample each column separately.
-    y1 <- data.frame(Gene=I(y[,1]),matrix(y[p1,2],n2,nsim))
+    p1 <- apply(matrix(1:n2,n2,nPermutations),2,sample) ##need "matrix" to resample each column separately.
+    y1 <- data.frame(Gene=I(genePValue[,1]),matrix(genePValue[p1,2],n2,nPermutations))
     rm(p1)
-    w <- f.mlp(x[ix,],y1,y2xi)[,-1]
+    w <- f.mlpStatistic(geneSet[ix,],y1,y2xi)[,-1]
   }
   
   ### Determine Cut-offs:
-  if (ind.smooth){
-    if (!ind.sim){
+  if (smoothPValues){
+    if (!rowPermutations){
       warning("Cannot smooth p-values if ind.sim = FALSE")
     }
     pw0 <- f.cut2(w0[i,], w, q.cutoff = c(0.5,0.9,0.95,0.99,0.999,0.9999,0.99999))
@@ -616,151 +623,6 @@ f.GOFiSH <- function(x, y, nmin = 5, nmax = 100, ind.sim = TRUE, nsim = 10, ind.
   }
   
   res <- data.frame(genesetSize = w0[i,1], genesetStatistic = w0[i,2], genesetPValue = pw0)
+  class(res) <- c("MLP", class(res))
   return(res)
-}
-
-
-###===============================OUTPUT RETRIEVAL FUNCTIONS========================
-
-#' TODO 
-#' @param ANames 
-#' @param go.out 
-#' @param ind.p 
-#' @param p.cutoff 
-#' @return 
-#' @export
-f.GO2Name <- function(ANames, go.out, ind.p = TRUE, p.cutoff = 0.01){
-  if (ind.p){
-    ii <- row.names(go.out[go.out[,3]<= p.cutoff, ])
-  } else{
-    ii <- row.names(go.out)
-  }
-  res <- data.frame(go.out[ii,], Geneset.Description = I(ANames[ii]))
-  return(res)
-}
-
-#' TODO
-#' @param p0 
-#' @param G 
-#' @return 
-#' @export
-f.P2G <- function(p0, G){
-  return(G[p0])
-}
-
-#' TODO 
-#' @param g0 
-#' @param A 
-#' @return 
-#' @export
-f.G2GO <- function(g0, A){
-  lg0 <- length(g0)
-  GO0 <- vector("list", lg0)
-  names(GO0) <- g0
-  for (j in 1:lg0){ 
-    GO0[[j]] <- A[A[,2]==g0[j], 1]
-    names(GO0[[j]]) <- NULL
-  }
-  return(GO0)
-}
-
-#' TODO 
-#' @param p0 
-#' @param G 
-#' @param A 
-#' @return 
-#' @author Tobias Verbeke
-#' @export
-f.P2GO <- function(p0, G, A){
-  g0 <- f.P2G(p0, G)
-  g0 <- sort(unique(g0))
-  GO0 <- f.G2GO(g0, A)
-  return(GO0)
-}
-
-#' TODO 
-#' @param G0 
-#' @param A 
-#' @return 
-#' @export
-f.GO2G <- function(G0, A){
-  lG0 <- length(G0)
-  g0 <- vector("list", lG0)
-  names(g0) <- G0
-  for (j in 1:lG0){ 
-    g0[[j]] <- A[A[,1]==G0[j],2]
-    names(g0[[j]]) <- NULL
-  }
-  return(g0)
-}
-
-#' TODO 
-#' @param g0 
-#' @param G 
-#' @return 
-#' @export
-f.G2P <- function(g0, G){
-  p0 <- NULL
-  for (j in g0){
-    p0 <- c(p0, names(G[G==j]))
-  }
-  return(p0)
-}
-
-#' TODO 
-#' @param G0 
-#' @param G 
-#' @param A 
-#' @return 
-#' @export
-f.GO2P <- function(G0, G, A){
-  g0 <-  unlist(f.GO2G(G0, A))
-  g0 <- sort(unique(g0))
-  p0 <- f.G2P(g0, G)
-  return(p0)
-}
-
-
-#' TODO
-#' @param x 
-#' @param y 
-#' @param go.out 
-#' @param go.pthreshold 
-#' @param gene.pthreshold 
-#' @param ind.log 
-#' @param fname 
-#' @return 
-#' @export
-f.GO2Gene <- function(x, y, go.out, go.pthreshold = 0.01, gene.pthreshold = 0.05, ind.log = FALSE, fname = "foo.pdf"){
-
-  ###Example:
-  go  <- go.out[go.out[,3] < go.pthreshold, ]
-  n <- go[,1]
-  go <- as.numeric(row.names(go))
-  
-  i <- order(go)
-  go <- go[i]
-  n <- n[i]
-   
-  pdf(file = fname, bg = "white")
-  
-  par(mfrow=c(2, 3))
-  
-  xjj <- NULL
-  for (j in go){
-    i <- seq_along(go)[go==j]
-    xj <- x[x[,1]==j, ]
-    xj <- cbind(xj, PVal = y[match(xj[,2], y[,1]), 2])
-    xj <- xj[order(xj[,3]),]
-    xj <- xj[xj[,3] < gene.pthreshold, ]
-    if (ind.log)
-      xj[,3] <- -log10(xj[,3])
-    barplot(xj[,3], names = xj[,2], las = 2, cex.names = 0.6)
-    title(main=paste("GO :",j, 
-            "n.Genes :", n[i], sep=" "), cex.main=0.75)
-    xjj <- rbind(xjj, xj)
-  }
-  dev.off()
-  dimnames(xjj) <- list(1:nrow(xjj), c("GO", "Gene", "PValue"))
-  return(xjj)
 }

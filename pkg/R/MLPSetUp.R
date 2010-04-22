@@ -14,78 +14,110 @@
 # library(affy)
 # library(AnnotationDbi)
 
-#' TODO
-#' @param Org 
-#' @param Onto 
-#' @param fNames 
-#' @param nMin 
-#' @param nMax 
-#' @return 
+# TODO integrate f.GOAnnotation inside f.MLP and change f.MLP to have genes and
+# GO terms as character rather than numeric
+
+#' This function extracts the GO terms from one of the following BioC packages
+#' and maps them to the subset of Entrez IDs that are present in the list of feature
+#' names provided (org.Mm.eg.db, org.Hs.eg.db, org.Rn.eg.db) It also thresholds the GO terms to those
+#' that have between minGenes and maxGenes number of Entrez IDs.
+#' @param organism character vector of length one indicating the organism, one of
+#' Mouse, Human or Rat; defaults to Mouse. 
+#' @param ontology one of three ontologies from the GO database 
+#' @param featureNames character vector of the feature names (Entrez IDs) to be included
+#' @param minGenes minimum number of genes in a gene set
+#' @param maxGenes maximum number of genes in a gene set
+#' @return data structure to be used as geneSet argument for f.GOInputMLP; list
+#' of GO terms each of which has a list of Entrez IDs as a vector
 #' @export
-f.GOAnnotation <- function(Org="Mouse", Onto="BP", fNames=fNames, nMin=5,nMax=100){
+f.GOAnnotation <- function(organism = "Mouse", ontology="BP", 
+		featureNames, minGenes=5, maxGenes=100){
+
+  if (!organism %in% c("Mouse", "Human", "Rat"))
+	  stop("The 'organism' argument should be one of 'Mouse', 'Human' or 'Rat'.")
+  if (!ontology %in% c("MF", "BP", "CC"))
+	  stop("The 'ontology' argument should be one of 'MF', 'BP' or 'CC'.")
   
-  ###Authors: An De Bondt, Tine Casneuf, Nandini Raghavan.
-  ###This code creates the necessary inputs for MLP analysis using libraries available from Bioconductor.
-  
-  ###Inputs: 
-  ###Org=c("Mouse",Human","Rat")
-  ###Onto=c("MF",BP","CC")
-  ###fNames = feature names in the dataset (Entrez IDs).
-  ###nMin = minimum number of genes in geneset.
-  ###nMax = maximum number of genes in geneset.
-  switch(Org,
+  switch(organism,
       Mouse = {require(org.Mm.eg.db)
-        go2entrez <- as.list(org.Mm.egGO2ALLEGS)},
-      Human = {require(org.Mm.eg.db)
-        go2entrez <- as.list(org.Mm.egGO2ALLEGS)},
+        goToEntrez <- as.list(org.Mm.egGO2ALLEGS)},
+      Human = {require(org.Hs.eg.db)
+        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)},
       Rat = {require(org.Rn.eg.db)
-        go2entrez <- as.list(org.Rn.egGO2ALLEGS)}
+        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)}
   )
   
-  ## create first input object with GO info
+  # create first input object with GO info
   allGOontol <- eapply(GOTERM, Ontology)  
   allGOTerm  <- eapply(GOTERM, Term)
   
-  ###Filter for GO terms related to specific Ontology:
-  GOs <- names(which(allGOontol == Onto))
-  go <- go2entrez[names(go2entrez) %in% GOs] 
+  # filter for GO terms related to specific ontology
+  GOs <- names(which(allGOontol == ontology))
+  go <- goToEntrez[names(goToEntrez) %in% GOs] 
   
-  ###Filter for GO terms related to specific Ontology and specific Chip:
-  go.eSet <- vector("list", length(go))
-  for (j in 1:length(go)){go.eSet[[j]] <- unique(go[[j]][go[[j]] %in% fNames]  )}
-  names(go.eSet) <- names(go) 
-  ind0 <- ifelse(unlist(lapply(go.eSet,length)) >0,T,F)
-  go.eSet <- go.eSet[ind0==T]
-  ind1 <- ifelse(lapply(go.eSet,length) >= nMin & lapply(go.eSet,length) <= nMax, TRUE, FALSE)
-  go.eSet <- go.eSet[ind1==T]
+  # Filter for GO terms related to specific Ontology and 
+  # specified list of feature names (potentially a subset of a chip)
+  goInFeatureNames <- vector("list", length(go))
+  for (j in 1:length(go)){
+	  goInFeatureNames[[j]] <- unique(go[[j]][go[[j]] %in% featureNames])
+  }
+  names(goInFeatureNames) <- names(go) 
+  anyGenesInGeneSet <- ifelse(unlist(lapply(goInFeatureNames, length)) > 0, TRUE, FALSE)
+  goInFeatureNames <- goInFeatureNames[anyGenesInGeneSet]
+  passMinAndMaxThresholds <- ifelse(lapply(goInFeatureNames,length) >= minGenes & lapply(goInFeatureNames,length) <= maxGenes, TRUE, FALSE)
+  goInFeatureNames <- goInFeatureNames[passMinAndMaxThresholds]
   
-  return(go.eSet)
-  
+  return(goInFeatureNames)
 }
 
+#' Prepare the input geneSet for the f.MLP function 
+#' @param goInFeatureNames output from f.GOAnnotation
+#' @return data structure ready to be used as geneSet argument for the f.MLP
+#'   function
+#' @export
+f.GOInputMLP <- function(goInFeatureNames){
+
+	out <- lapply(names(goInFeatureNames), function(goid) {
+				i.genes <- unique(goInFeatureNames[[goid]])
+				matrix(c(rep(x = goid, times = length(i.genes)), i.genes), ncol = 2, byrow = FALSE)
+			})
+	out <- do.call(rbind, out)
+	out <- as.data.frame(out, stringsAsFactors = FALSE)
+	out <- out[!is.na(out[,2]), ]
+	colnames(out) <- c('GO', 'Gene.ID')
+	out[,1] <- sub('GO:', '', out[,1])
+	out[,1] <- as.numeric(out[,1])
+	out[,2] <- as.numeric(out[,2])
+	out <- unique(out)
+	out <- as.matrix(out) ### listed as a matrix as needed for ML
+	return(out)	
+}
+
+#' TODO fix S3 export
 #' TODO 
-#' @param x 
+#' TODO (low priority currently) add print method for MLP objects
+
+
+#' Summary function for MLP objects; this function combines
+#'   the MLP results with the biological description of the
+#'   gene sets
+#' @param goInFeatureNames 
+#' @param mlpOutput 
 #' @return 
 #' @export
-f.GOInputMLP <- function(x = go.eSet){
-  
-  ###Authors: An De Bondt, Tine Casneuf, Nandini Raghavan.
-  ###This code converts the output of f.GOAnnotation to the necessary format for input for MLP analysis.
-  
-  ###Input: go.eSet output from f.GOAnnotation.
-  out <- lapply(names(go.eSet), function(goid) {
-        i.genes <- unique(go.eSet[[goid]])
-        matrix(c(rep(x = goid, times = length(i.genes)), i.genes), ncol = 2, byrow = FALSE)
-      })
-  out <- do.call(rbind, out)
-  out <- as.data.frame(out, stringsAsFactors = FALSE)
-  out <- out[!is.na(out[,2]), ]
-  colnames(out) <- c('GO', 'Gene.ID')
-  out[, 1] <- sub('GO:', '', out[, 1])
-  out[, 1] <- as.numeric(out[, 1])
-  out[, 2] <- as.numeric(out[, 2])
-  out <- unique(out)
-  out <- as.matrix(out) ### listed as a matrix as needed for ML
-  return(out)
-  
+summary.MLP <- function(goInFeatureNames, mlpOutput){
+	
+	allGOTerm  <- eapply(GOTERM, Term)
+	geneSetNames <- names(goInFeatureNames)
+	nGenesInGeneset <- unlist(lapply(goInFeatureNames, length))
+	genesetData <- data.frame("Geneset" = geneSetNames, 
+			"Geneset.Name" = unlist(allGOTerm[geneSetNames]),
+			"Geneset.Size" = nGenesInGeneset)
+	
+	returnValue <- data.frame(genesetData, mlpOutput[, c("genesetStatistic", "genesetPValue")])
+	rownames(returnValue) <- 1:nrow(returnValue)
+	
+	returnValue <- returnValue[order(returnValue[,5]),]
+	
+	return(returnValue)
 }
