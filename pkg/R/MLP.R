@@ -1,24 +1,3 @@
-###Note: 05-12-2009: Deleted GO Annotation functions. Instead use RFunctions_MLPSetup.txt 
-
-# File: RFunctions_MLP.txt
-# Author: Nandini Raghavan. Other Contributing Authors: Javier Cabrera, Dhammika Amaratunga.
-# Last modified: March19, 2008
-
-# Description: This code contains the necessary R functions to
-# (i) create the necessary annotation data and expression data inputs 
-# (ii) do an MLP analysis with options to use either gene or sample permutations. 
-# Functions included here: 
-# f.AffyP2GCleanup, f.GOTaxChip,f.GONames, f.AffyP2G,
-# f.u, f.mlp0, f.mlp, f.permtwo, f.permk (incomplete),f.pperm
-# f.rt, f.rtt, f.rsd,f.rsp,f.rspp, f.rvar, f.toarray, f.qnorm
-# f.y2x, f.pp2g,
-# f.cut0,f.cut1,f.cut2, f.ee1, f.smdecreasing1, f.ctpval1,f.csort
-# f.GoFiSH
-# f.GO2Name,f.GO2Gene, f.GO2G, f.GO2P,f.G2P,f.G2GO,f.P2G,f.P2GO
-
-
-###====================== MLP STATISTIC ========================
-
 #' Compute column means of minus log10 of the data
 #' @param x matrix
 #' @return vector of column means of -log10(x) 
@@ -56,6 +35,12 @@ f.mlp0 <- function(geneSet, genePValue, mappingFunctionOutput){
 }
 
 
+#' TODO 
+#' @param inputData 
+#' @param y 
+#' @param y2x 
+#' @return TODO 
+#' @export
 f.mlp <- function(inputData, y, y2x){
   ###This function calculates the mean of the gene-statistic y[,2] for each unique gene-set in x[,1].
   ### inputData is the input table of gene-sets and gene-names.
@@ -73,8 +58,6 @@ f.mlp <- function(inputData, y, y2x){
     return(cbind(number, u))
   }
 }
-
-###=============================== EXACT PERMUTATIONS===========================
 
 #' Calculate all unique permutations for 1:n, with k = 2 in each group
 #'   (e.g. wild-type vs. knock-out) ; used for column permutations only
@@ -639,6 +622,13 @@ f.GOFiSH <- function(x, y, nmin = 5, nmax = 100, ind.sim = TRUE, nsim = 10, ind.
 
 ###===============================OUTPUT RETRIEVAL FUNCTIONS========================
 
+#' TODO 
+#' @param ANames 
+#' @param go.out 
+#' @param ind.p 
+#' @param p.cutoff 
+#' @return 
+#' @export
 f.GO2Name <- function(ANames, go.out, ind.p = TRUE, p.cutoff = 0.01){
   if (ind.p){
     ii <- row.names(go.out[go.out[,3]<= p.cutoff, ])
@@ -649,10 +639,20 @@ f.GO2Name <- function(ANames, go.out, ind.p = TRUE, p.cutoff = 0.01){
   return(res)
 }
 
+#' TODO
+#' @param p0 
+#' @param G 
+#' @return 
+#' @export
 f.P2G <- function(p0, G){
   return(G[p0])
 }
 
+#' TODO 
+#' @param g0 
+#' @param A 
+#' @return 
+#' @export
 f.G2GO <- function(g0, A){
   lg0 <- length(g0)
   GO0 <- vector("list", lg0)
@@ -664,6 +664,13 @@ f.G2GO <- function(g0, A){
   return(GO0)
 }
 
+#' TODO 
+#' @param p0 
+#' @param G 
+#' @param A 
+#' @return 
+#' @author Tobias Verbeke
+#' @export
 f.P2GO <- function(p0, G, A){
   g0 <- f.P2G(p0, G)
   g0 <- sort(unique(g0))
@@ -671,6 +678,11 @@ f.P2GO <- function(p0, G, A){
   return(GO0)
 }
 
+#' TODO 
+#' @param G0 
+#' @param A 
+#' @return 
+#' @export
 f.GO2G <- function(G0, A){
   lG0 <- length(G0)
   g0 <- vector("list", lG0)
@@ -682,6 +694,11 @@ f.GO2G <- function(G0, A){
   return(g0)
 }
 
+#' TODO 
+#' @param g0 
+#' @param G 
+#' @return 
+#' @export
 f.G2P <- function(g0, G){
   p0 <- NULL
   for (j in g0){
@@ -690,6 +707,12 @@ f.G2P <- function(g0, G){
   return(p0)
 }
 
+#' TODO 
+#' @param G0 
+#' @param G 
+#' @param A 
+#' @return 
+#' @export
 f.GO2P <- function(G0, G, A){
   g0 <-  unlist(f.GO2G(G0, A))
   g0 <- sort(unique(g0))
@@ -698,6 +721,16 @@ f.GO2P <- function(G0, G, A){
 }
 
 
+#' TODO
+#' @param x 
+#' @param y 
+#' @param go.out 
+#' @param go.pthreshold 
+#' @param gene.pthreshold 
+#' @param ind.log 
+#' @param fname 
+#' @return 
+#' @export
 f.GO2Gene <- function(x, y, go.out, go.pthreshold = 0.01, gene.pthreshold = 0.05, ind.log = FALSE, fname = "foo.pdf"){
 
   ###Example:

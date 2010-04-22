@@ -14,6 +14,14 @@
 # library(affy)
 # library(AnnotationDbi)
 
+#' TODO
+#' @param Org 
+#' @param Onto 
+#' @param fNames 
+#' @param nMin 
+#' @param nMax 
+#' @return 
+#' @export
 f.GOAnnotation <- function(Org="Mouse", Onto="BP", fNames=fNames, nMin=5,nMax=100){
   
   ###Authors: An De Bondt, Tine Casneuf, Nandini Raghavan.
@@ -55,7 +63,10 @@ f.GOAnnotation <- function(Org="Mouse", Onto="BP", fNames=fNames, nMin=5,nMax=10
   
 }
 
-
+#' TODO 
+#' @param x 
+#' @return 
+#' @export
 f.GOInputMLP <- function(x = go.eSet){
   
   ###Authors: An De Bondt, Tine Casneuf, Nandini Raghavan.
