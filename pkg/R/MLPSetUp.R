@@ -8,11 +8,11 @@
 ###Required Libraries:
 
 ###Organism library:
-#library(affy)
-#library(org.Hs.eg.db)   ### library(org.Mm.eg.db)  ### library(org.Rn.eg.db)
-#library(GO.db)
-#library(affy)
-#library(AnnotationDbi)
+# library(affy)
+# library(org.Hs.eg.db)   ### library(org.Mm.eg.db)  ### library(org.Rn.eg.db)
+# library(GO.db)
+# library(affy)
+# library(AnnotationDbi)
 
 f.GOAnnotation <- function(Org="Mouse", Onto="BP", fNames=fNames, nMin=5,nMax=100){
   

@@ -110,10 +110,10 @@ y[1:10,]
 
 ###==============================================RUN MLP===========================================
 
-out.MLP <- f.GOFiSH(x = x, y = y, nmin = 5, nmax = 100, ind.sim = 1, nsim = 200, ind.smooth = 1)
-tmp <- f.GOOutputMLP(x1=go.eSet,x2 = out.MLP)
+out.MLP <- f.GOFiSH(x = x, y = y, nmin = 5, nmax = 100, ind.sim = TRUE, nsim = 6, ind.smooth = TRUE)
+# tmp <- f.GOOutputMLP(x1 = go.eSet,x2 = out.MLP)
 
-tmp[1:10,]
+# tmp[1:10,]
 #        Geneset
 #943  GO:0015718
 #660  GO:0007565
