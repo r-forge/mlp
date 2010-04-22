@@ -103,7 +103,7 @@ f.GOInputMLP <- function(goInFeatureNames){
 #'   gene sets
 #' @param goInFeatureNames 
 #' @param mlpOutput 
-#' @return 
+#' @return TODO
 #' @export
 summary.MLP <- function(goInFeatureNames, mlpOutput){
 	

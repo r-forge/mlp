@@ -3,10 +3,11 @@ Type: Package
 Title: MLP
 Version: 0.0-1
 Date: 2009-09-19
-Author: Nandini Raghavan, with contributions by Javier Cabrera, Dhammika Amaratunga, An De Bondt
-  and Tine Casneuf
+Author: Nandini Raghavan, with contributions by Javier Cabrera,
+    Dhammika Amaratunga, An De Bondt and Tine Casneuf
 Maintainer: Nandini Raghavan <nraghava@its.jnj.com>
 Description: Mean Log P Analysis
 Depends: GO.db, AnnotationDbi, affy
-Suggests: org.Hs.eg.db, org.Mm.eg.db, org.Rn.eg.db 
+Suggests: org.Hs.eg.db, org.Mm.eg.db, org.Rn.eg.db
 License: GPL-3
+Collate: 'MLP.R' 'MLPSetUp.R'

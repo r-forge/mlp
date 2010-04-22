@@ -359,14 +359,20 @@ f.cut2 <- function(w0, w, q.cutoff){
 }
 
 #' TODO
-#' @param x
-#' @param y
-#' @param x0
-#' @param y0
+#' @param x TODO
+#' @param y TODO
+#' @param x0 TODO
+#' @param y0 TODO
 #' @param type one of "none", "dec" or "inc"
 #' @param m defaults
-#' @param
-#' @return 
+#' @param lqi TODO
+#' @param hqi TODO
+#' @param sym TODO
+#' @param plot TODO
+#' @param flag TODO
+#' @param dg TODO
+#' @param logtran TODO
+#' @return TODO
 #' @export 
 f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
     sym = FALSE, plot = TRUE, flag = FALSE, dg = 15, logtran = FALSE) {
