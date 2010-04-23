@@ -1,7 +1,7 @@
-\name{f.permk}
-\alias{f.permk}
+\name{permk}
+\alias{permk}
 \title{Calculate all permutations...}
-\usage{f.permk(gr)}
+\usage{permk(gr)}
 \description{Calculate all permutations
 (used for column permutations)}
 \arguments{\item{gr}{}}

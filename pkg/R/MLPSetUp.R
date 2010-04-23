@@ -14,7 +14,7 @@
 # library(affy)
 # library(AnnotationDbi)
 
-# TODO integrate f.GOAnnotation inside f.MLP and change f.MLP to have genes and
+# TODO integrate goAnnotation inside MLP and change MLP to have genes and
 # GO terms as character rather than numeric
 
 #' This function extracts the GO terms from one of the following BioC packages
@@ -25,13 +25,13 @@
 #' Mouse, Human or Rat; defaults to Mouse. 
 #' @param ontology one of three ontologies from the GO database 
 #' @param featureNames character vector of the feature names (Entrez IDs) to be included
-#' @param minGenes minimum number of genes in a gene set
-#' @param maxGenes maximum number of genes in a gene set
-#' @return data structure to be used as geneSet argument for f.GOInputMLP; list
+#' @param minGenes minimum number of genes in a gene set; defaults to 5
+#' @param maxGenes maximum number of genes in a gene set; defaults to 100
+#' @return data structure to be used as geneSet argument for goInputMLP; list
 #' of GO terms each of which has a list of Entrez IDs as a vector
 #' @export
-f.GOAnnotation <- function(organism = "Mouse", ontology="BP", 
-		featureNames, minGenes=5, maxGenes=100){
+goAnnotation <- function(organism = "Mouse", ontology = "BP", 
+		featureNames, minGenes = 5, maxGenes = 100){
 
   if (!organism %in% c("Mouse", "Human", "Rat"))
 	  stop("The 'organism' argument should be one of 'Mouse', 'Human' or 'Rat'.")
@@ -39,12 +39,18 @@ f.GOAnnotation <- function(organism = "Mouse", ontology="BP",
 	  stop("The 'ontology' argument should be one of 'MF', 'BP' or 'CC'.")
   
   switch(organism,
-      Mouse = {require(org.Mm.eg.db)
-        goToEntrez <- as.list(org.Mm.egGO2ALLEGS)},
-      Human = {require(org.Hs.eg.db)
-        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)},
-      Rat = {require(org.Rn.eg.db)
-        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)}
+      Mouse = {
+        require(org.Mm.eg.db)
+        goToEntrez <- as.list(org.Mm.egGO2ALLEGS) # TODO
+      },
+      Human = {
+        require(org.Hs.eg.db)
+        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
+      },
+      Rat = {
+        require(org.Rn.eg.db)
+        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
+      }
   )
   
   # create first input object with GO info
@@ -70,12 +76,12 @@ f.GOAnnotation <- function(organism = "Mouse", ontology="BP",
   return(goInFeatureNames)
 }
 
-#' Prepare the input geneSet for the f.MLP function 
-#' @param goInFeatureNames output from f.GOAnnotation
-#' @return data structure ready to be used as geneSet argument for the f.MLP
+#' Prepare the input geneSet for the MLP function 
+#' @param goInFeatureNames output from goAnnotation
+#' @return data structure ready to be used as geneSet argument for the MLP
 #'   function
 #' @export
-f.GOInputMLP <- function(goInFeatureNames){
+goInputMLP <- function(goInFeatureNames){
 
 	out <- lapply(names(goInFeatureNames), function(goid) {
 				i.genes <- unique(goInFeatureNames[[goid]])
@@ -101,11 +107,14 @@ f.GOInputMLP <- function(goInFeatureNames){
 #' Summary function for MLP objects; this function combines
 #'   the MLP results with the biological description of the
 #'   gene sets
+#' @param object object of class 'MLP' as produced by the 'MLP' function 
 #' @param goInFeatureNames 
-#' @param mlpOutput 
+#' @param ... further arguments; currently none are used
 #' @return TODO
+#' @method summary MLP
+#' @S3method summary MLP
 #' @export
-summary.MLP <- function(goInFeatureNames, mlpOutput){
+summary.MLP <- function(object, goInFeatureNames, ...){
 	
 	allGOTerm  <- eapply(GOTERM, Term)
 	geneSetNames <- names(goInFeatureNames)
@@ -114,7 +123,7 @@ summary.MLP <- function(goInFeatureNames, mlpOutput){
 			"Geneset.Name" = unlist(allGOTerm[geneSetNames]),
 			"Geneset.Size" = nGenesInGeneset)
 	
-	returnValue <- data.frame(genesetData, mlpOutput[, c("genesetStatistic", "genesetPValue")])
+	returnValue <- data.frame(genesetData, object[, c("genesetStatistic", "genesetPValue")])
 	rownames(returnValue) <- 1:nrow(returnValue)
 	
 	returnValue <- returnValue[order(returnValue[,5]),]

@@ -1,7 +1,8 @@
-\name{f.rt}
-\alias{f.rt}
+\name{tStatistic}
+\alias{tStatistic}
 \title{Function to compute the t statistic and p values for expression values corresponding to...}
-\usage{f.rt(x, y, var.thresh=10^-4, num.thresh=10^(-6), denom.thresh=10^(-6))}
+\usage{tStatistic(x, y, var.thresh=10^-4, num.thresh=10^(-6),
+    denom.thresh=10^(-6))}
 \description{Function to compute the t statistic and p values for expression values corresponding to 
 two groups; the function applies a correction for small variances, t statistic numerators
 and t statistic denominators. 

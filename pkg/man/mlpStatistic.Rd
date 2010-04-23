@@ -1,7 +1,7 @@
-\name{f.mlpStatistic}
-\alias{f.mlpStatistic}
+\name{mlpStatistic}
+\alias{mlpStatistic}
 \title{TODO...}
-\usage{f.mlpStatistic(inputData, y, y2x)}
+\usage{mlpStatistic(inputData, y, y2x)}
 \description{TODO}
 \value{TODO}
 \arguments{\item{inputData}{}

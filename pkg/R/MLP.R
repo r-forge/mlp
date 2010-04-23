@@ -2,7 +2,7 @@
 #' @param x matrix
 #' @return vector of column means of -log10(x) 
 #' @export
-f.u <- function(x){ 
+u <- function(x){ 
   colMeans(-log10(x)) 
 }
 
@@ -19,13 +19,13 @@ f.u <- function(x){
 #' @return data frame with two columns; first column contains the number of genes
 #'    in the gene set; the second column contains the MLP statistic (u) for the gene set.
 #' @export
-f.mlp0 <- function(geneSet, genePValue, mappingFunctionOutput){
+mlp0 <- function(geneSet, genePValue, mappingFunctionOutput){
   
   n <- table(geneSet[, 1])
   s1  <- split(genePValue[mappingFunctionOutput, -1], geneSet[, 1])
   
   # u is the  MLP statistic
-  u  <- t(sapply(s1, function(x){f.u(matrix(x, ncol = ncol(genePValue) - 1))}))
+  u  <- t(sapply(s1, function(x){u(matrix(x, ncol = ncol(genePValue) - 1))}))
 
   if (ncol(genePValue) == 2){
     return(cbind(n, as.vector(u)))
@@ -41,16 +41,16 @@ f.mlp0 <- function(geneSet, genePValue, mappingFunctionOutput){
 #' @param y2x 
 #' @return TODO 
 #' @export
-f.mlpStatistic <- function(inputData, y, y2x){
+mlpStatistic <- function(inputData, y, y2x){
   ###This function calculates the mean of the gene-statistic y[,2] for each unique gene-set in x[,1].
   ### inputData is the input table of gene-sets and gene-names.
   ### y is the input table of gene-names and gene-statistics.
   ### y2x is the mapping of the gene-names in y to those in x.
   
   number   <- table(inputData[,1])
-  s1  <- split(f.toarray(y[y2x, -1]), inputData[,1])
+  s1  <- split(toArray(y[y2x, -1]), inputData[,1])
   
-  u  <- t(sapply(s1, function(x){f.u(matrix(x, ncol=ncol(y)-1))}))
+  u  <- t(sapply(s1, function(x){u(matrix(x, ncol=ncol(y)-1))}))
   
   if (ncol(y) == 2){
     return(cbind(number, as.vector(u)))
@@ -63,7 +63,7 @@ f.mlpStatistic <- function(inputData, y, y2x){
 #'   (e.g. wild-type vs. knock-out) ; used for column permutations only
 #' @param n
 #' @param k
-f.permtwo = function (n, k) 
+permtwo = function (n, k) 
 {
   ### From Javier 1/27/2006
   x <- c(0, 1)
@@ -88,15 +88,15 @@ f.permtwo = function (n, k)
 #' (used for column permutations)
 #' @param gr
 #' @export
-f.permk <- function(gr) 
+permk <- function(gr) 
 {
   ### From Javier 1/27/2006
   ff <- cumsum(gr)
-  ttt <- f.permtwo(ff[2],ff[1])
+  ttt <- permtwo(ff[2],ff[1])
   for(i in 3:length(gr)) 
   {
     tt <- ttt
-    tt1 <- f.permtwo(ff[i],ff[i-1])
+    tt1 <- permtwo(ff[i],ff[i-1])
     ttt <- NULL
     for(i in ff[i-1]+1:gr[i]) tt <- cbind(tt,i)
     for(i in 1:nrow(tt1)) ttt <- rbind(ttt,cbind(tt,6,7)[,tt1[i,]])
@@ -116,11 +116,11 @@ f.permk <- function(gr)
 #'   whether random permutations should be used (FALSE)
 #' @param np is the number of random permutations, if ind.exact != TRUE.
 #' TODO turn into real (executable) example
-#' Example: ypp <- f.pperm(dma.norm, 1:4, 5:8, ind.exact = TRUE, 1))
-#' Example: ypp <- f.pperm(dma.norm, 1:4, 5:8, ind.exact = FALSE, 100)) 
+#' Example: ypp <- pperm(dma.norm, 1:4, 5:8, ind.exact = TRUE, 1))
+#' Example: ypp <- pperm(dma.norm, 1:4, 5:8, ind.exact = FALSE, 100)) 
 #' @return matrix of p values corresponding to a permutation of the columns of the expression matrix
 #' @export 
-f.pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
+pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
   
   ### Calculating the p-value of the original t-statistic and replacing NA's with 1.
   n0 <- length(p0)
@@ -130,7 +130,7 @@ f.pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
   ### Creating the random permutations:
   if (ind.exact){
     ### matrix of exact column permutations 
-    pj <- f.permtwo(n,n0)
+    pj <- permtwo(n,n0)
     p0p1String <- paste(c(p0, p1), collapse = "")
     pj <- pj[-pmatch(p0p1String,
             apply(pj, 1, function(x) paste(x, collapse = ""))),]
@@ -139,7 +139,7 @@ f.pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
     for (j in 1:np){
       j0 <- pj[j,][1:n0]
       j1 <- pj[j,][(n0+1):n]
-      pp[,(j+1)] <- f.rt(x[,j0],x[,j1])[,4]
+      pp[,(j+1)] <- tStatistic(x[,j0],x[,j1])[,4]
       
     }
   } else {  
@@ -155,10 +155,10 @@ f.pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
       }
       j0 <- pj[1:n0]
       j1 <- pj[(n0+1):n]
-      pp[, (j+1)] <- f.rt(x[,j0], x[,j1])[,4]
+      pp[, (j+1)] <- tStatistic(x[,j0], x[,j1])[,4]
     }}
   
-  pp[,1] <- f.rt(x[,p0],x[,p1])[,4]
+  pp[,1] <- tStatistic(x[,p0],x[,p1])[,4]
   pp[is.na(pp)] <- 1
   
   work <- paste("P", 0:np, sep = "")
@@ -185,13 +185,13 @@ f.pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
 #' @return matrix with four columns: numeratorTStatistic, denominatorTStatistic, tStatistic, 
 #'          and pValueTStatistic  
 #' @export
-f.rt <- function (x, y, var.thresh = 10^-4, num.thresh = 10^(-6), denom.thresh = 10^(-6)) {
+tStatistic <- function (x, y, var.thresh = 10^-4, num.thresh = 10^(-6), denom.thresh = 10^(-6)) {
   nx <- (!is.na(x)) %*% rep(1, ncol(x))
   ny <- (!is.na(y)) %*% rep(1, ncol(y))
   t.numer <- (rowMeans(x) - rowMeans(y))
-  t.denom <- f.rssp(x, y)
+  t.denom <- rssp(x, y)
   
-  i0 <- f.rvar(cbind(x, y)) < var.thresh
+  i0 <- rvar(cbind(x, y)) < var.thresh
   i1 <- abs(t.numer ) < num.thresh & t.denom < denom.thresh
   i <- i0 | i1
   t.numer[i] <-  0
@@ -219,16 +219,16 @@ f.rt <- function (x, y, var.thresh = 10^-4, num.thresh = 10^(-6), denom.thresh =
 
 ### auxiliary functions for 
 
-#' computes the standard deviation corresponding to the variances output by f.rvar
-f.rsd <- function(x) sqrt(f.rvar(x))
+#' computes the standard deviation corresponding to the variances output by rvar
+rsd <- function(x) sqrt(rvar(x))
 #' computes the mean standard deviation for two groups
-f.rsp <- function(x1, x2) sqrt((f.rvar(x1) + f.rvar(x2))/2)
+rsp <- function(x1, x2) sqrt((rvar(x1) + rvar(x2))/2)
 # compute the variances for each row in a matrix (e.g. of expression values)
-f.rvar <- function(x, n = ncol(x)) c((x - rowMeans(x))^2 %*% rep(1,n)) / (n-1)
+rvar <- function(x, n = ncol(x)) c((x - rowMeans(x))^2 %*% rep(1,n)) / (n-1)
 # converts data frames to arrays
-f.toarray <- function(x) array(unlist(x), dim(x), dimnames(x))
+toArray <- function(x) array(unlist(x), dim(x), dimnames(x))
 # computes the pooled standard deviation
-f.rssp <- function(x1, x2) f.rsp(x1, x2) * sqrt(1 / ncol(x1) + 1 / ncol(x2))
+rssp <- function(x1, x2) rsp(x1, x2) * sqrt(1 / ncol(x1) + 1 / ncol(x2))
 
 
 ###==============================MAPPING FUNCTIONS=======================
@@ -243,7 +243,7 @@ f.rssp <- function(x1, x2) f.rsp(x1, x2) * sqrt(1 / ncol(x1) + 1 / ncol(x2))
 #}
 #### TV: not needed: plain paste(., collapse = "")
 
-f.y2x <- function(x, y){
+y2x <- function(x, y){
   ### Function to map the character vector y to character vector x.
   ### CAUTION: Only works correctly for unique entries in y. (07-28-2006)
   x <- as.character(x)
@@ -262,7 +262,7 @@ f.y2x <- function(x, y){
 #' @param yp input table of probe.ids and original and permuted probeset-statistics.
 #' @return TODO fill out 
 #' @export
-f.pp2g <- function(xp, yp){
+pp2g <- function(xp, yp){
   
   x1  <- xp[, 1]
   x2  <- xp[, 2]
@@ -272,7 +272,7 @@ f.pp2g <- function(xp, yp){
   yp  <- yp[, -1]
   dimnames(yp)[[1]] <- pid  ### need for filtering for y downstream.
   
-  y2xp <- f.y2x(xp[,2],pid) ### map p-values in yp to probesets in xp.
+  y2xp <- y2x(xp[,2],pid) ### map p-values in yp to probesets in xp.
   p1   <- data.frame(Probe.ID=pid[y2xp],P0=yp[y2xp,2])
   
   
@@ -291,7 +291,7 @@ f.pp2g <- function(xp, yp){
   
   
   ###Create unique(GO.#, Gene.ID) combination table.
-  y2x3<- f.y2x(x3,x30)
+  y2x3<- y2x(x3,x30)
   x41 <- x1*10^10 + y2x3 ###(GO number inflated  + gene number)
   n41 <- length(x41)
   x40 <- sort(unique(x41)) ###multiple probe-sets corr. to gene can cause duplication in x41.
@@ -316,7 +316,7 @@ f.pp2g <- function(xp, yp){
 #' TODO rename to permutationGenesetStats
 #' @return vector of p values for each gene set
 #' @export
-f.cut0 <- function(w0, w){
+cut0 <- function(w0, w){
   # individual cut-offs
   w1 <- matrix(rep(w0[, 2], ncol(w)), nrow = nrow(w0), ncol = ncol(w))
   dw0w1 <-  ifelse(w1 - w > 0, 1, 0)
@@ -346,14 +346,14 @@ f.cut0 <- function(w0, w){
 #' TODO rename to criticalValuesGeneset  
 #' @return vector of p values for each gene set
 #' @export
-f.cut2 <- function(w0, w, q.cutoff){
+cut2 <- function(w0, w, q.cutoff){
   ### This imposes the decreasing criterion and has df =9
-  ### SMOOTHED CUTOFFS :Uses f.ee, f.ctpval and related functions from Javier's code. 
+  ### SMOOTHED CUTOFFS :Uses ee, ctpval and related functions from Javier's code. 
   w1 <- cbind(rep(w0[,1], ncol(w[,])), as.vector(w[,]))
   lqi = NULL; hqi= q.cutoff
-  ### work <- f.ee1(x=sqrt(w1[,1]), y=w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = F, plot = T, flag = F, dg = 15, logtran = F)
-  work <- f.ee1(x = sqrt(w1[,1]), y = w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = FALSE, plot = TRUE, flag = FALSE, dg = 9, logtran = FALSE)
-  pval <- f.ctpval1(work, nch=6)
+  ### work <- ee1(x=sqrt(w1[,1]), y=w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = F, plot = T, flag = F, dg = 15, logtran = F)
+  work <- ee1(x = sqrt(w1[,1]), y = w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = FALSE, plot = TRUE, flag = FALSE, dg = 9, logtran = FALSE)
+  pval <- ctpval1(work, nch=6)
   rm(work)
   return(pval)
 }
@@ -374,7 +374,7 @@ f.cut2 <- function(w0, w, q.cutoff){
 #' @param logtran TODO
 #' @return TODO
 #' @export 
-f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
+ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
     sym = FALSE, plot = TRUE, flag = FALSE, dg = 15, logtran = FALSE) {
 #  x, y are the coordinates of the points used to generate the
 #       envelope.
@@ -409,7 +409,7 @@ f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, 
   xt2 <- array(y1[i], c(m, n1))
   if (sym) 
     xt2 <- abs(xt2) 
-  zz <- f.csort(xt2)
+  zz <- csort(xt2)
   if (flag) 
     xq2 <- zz[round(qi * m), ]
   else xq2 <- apply(xt2, 2, quantile,qi)
@@ -434,7 +434,7 @@ f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, 
   
   vv <- function(xq, qq) {
     xxtp <- smooth.spline(xp2,xq+xmed,df=dg)
-    w <- f.smdecreasing1(xxtp,x,decreasing=down)
+    w <- smdecreasing1(xxtp,x,decreasing=down)
     kc <- quantile((y1)/(w-ymed),if(qq>0.5) qq else 1-qq)       
     zz <- (w-ymed)*kc+ymed
     w <-  zz+ quantile(-zz+y1+ymed,qq)
@@ -497,7 +497,8 @@ f.ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, 
   cbind(T = c(y0), xtp, Sp=x0)
 }
 
-f.smdecreasing1 <- function(z, w, decreasing=TRUE) {
+# TODO document
+smdecreasing1 <- function(z, w, decreasing=TRUE) {
 # z output of smooth.spline with x component sorted.
 # The y component of z must be non increasing, if not the 
 #    function willmake it non-increasing
@@ -525,7 +526,7 @@ f.smdecreasing1 <- function(z, w, decreasing=TRUE) {
   if (decreasing) w1 else -w1
 }
 
-f.csort <- function(x) { 
+csort <- function(x) { 
   n  <- nrow(x)
   p  <- ncol(x)
   rx <- range(x)
@@ -536,7 +537,7 @@ f.csort <- function(x) {
   z
 }
 
-f.ctpval1 <- function(x.ct,nch=6) {
+ctpval1 <- function(x.ct,nch=6) {
   p <- ncol(x.ct) 
   pr <- 2:(p-1)
   x <- log(x.ct[,pr])
@@ -575,15 +576,15 @@ f.ctpval1 <- function(x.ct,nch=6) {
 #' @return data frame with three columns: genesetSize, genesetStatistic and genesetPValue.
 #' @references TODO
 #' @export
-f.MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 10, smoothPValues = TRUE){
+MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 10, smoothPValues = TRUE){
   
   if (!is.numeric(geneSet)){
     warning("Input x should be numeric")
-    geneSet <- f.toarray(geneSet)
+    geneSet <- toArray(geneSet)
   }
   if (!is.numeric(genePValue)){
     warning("Input y should be numeric")
-    genePValue <- f.toarray(genePValue)
+    genePValue <- toArray(genePValue)
   }
   
   if (!rowPermutations){
@@ -592,30 +593,30 @@ f.MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutat
   
   ### Remove missing values from x and y.
   genePValue <- genePValue[!is.na(genePValue[,2]), ]
-  y2x <- f.y2x(geneSet[,2], genePValue[,1])
+  y2x <- y2x(geneSet[,2], genePValue[,1])
   geneSet <- geneSet[!is.na(y2x), ]
-  y2x <- f.y2x(geneSet[,2], genePValue[,1])
+  y2x <- y2x(geneSet[,2], genePValue[,1])
   
   n1 <- length(unique(geneSet[,1]))
   n2 <- nrow(genePValue)
   
-  w0 <- f.mlp0(geneSet,genePValue[,1:2],y2x)
+  w0 <- mlp0(geneSet,genePValue[,1:2],y2x)
   i <- ((w0[,1] <= maxGenes) & (w0[,1] >= minGenes))
   # Only relevant rows of x to reduce downstream computations.
   ix   <- i[match(geneSet[,1],names(i))]
-  y2xi <- f.y2x(geneSet[ix,2],genePValue[,1])
+  y2xi <- y2x(geneSet[ix,2],genePValue[,1])
   n11 <- length(unique(geneSet[ix,1]))
   
   ### Create simulation data:
   if (!rowPermutations){
     ### Column Permutations
-    w <- f.mlpStatistic(geneSet[ix,], genePValue[,-2], y2xi)[,-1]
+    w <- mlpStatistic(geneSet[ix,], genePValue[,-2], y2xi)[,-1]
   } else {
     ### Row Permutations
     p1 <- apply(matrix(1:n2,n2,nPermutations),2,sample) ##need "matrix" to resample each column separately.
     y1 <- data.frame(Gene=I(genePValue[,1]),matrix(genePValue[p1,2],n2,nPermutations))
     rm(p1)
-    w <- f.mlpStatistic(geneSet[ix,],y1,y2xi)[,-1]
+    w <- mlpStatistic(geneSet[ix,],y1,y2xi)[,-1]
   }
   
   ### Determine Cut-offs:
@@ -623,9 +624,9 @@ f.MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutat
     if (!rowPermutations){
       warning("Cannot smooth p-values if ind.sim = FALSE")
     }
-    pw0 <- f.cut2(w0[i,], w, q.cutoff = c(0.5,0.9,0.95,0.99,0.999,0.9999,0.99999))
+    pw0 <- cut2(w0[i,], w, q.cutoff = c(0.5,0.9,0.95,0.99,0.999,0.9999,0.99999))
   } else {
-    pw0 <- f.cut0(w0[i,], w)
+    pw0 <- cut0(w0[i,], w)
   }
   
   res <- data.frame(genesetSize = w0[i,1], genesetStatistic = w0[i,2], genesetPValue = pw0)

@@ -1,7 +1,7 @@
-\name{f.ee1}
-\alias{f.ee1}
+\name{ee1}
+\alias{ee1}
 \title{TODO...}
-\usage{f.ee1(x, y, x0=x, y0=y, type=c("none", "dec", "inc"), m=20, lqi=0.05,
+\usage{ee1(x, y, x0=x, y0=y, type=c("none", "dec", "inc"), m=20, lqi=0.05,
     hqi=0.95, sym=FALSE, plot=TRUE, flag=FALSE, dg=15, logtran=FALSE)}
 \description{TODO}
 \value{TODO}

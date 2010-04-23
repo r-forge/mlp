@@ -1,7 +1,7 @@
-\name{f.pperm}
-\alias{f.pperm}
+\name{pperm}
+\alias{pperm}
 \title{The function computes a matrix of gene set p values.}
-\usage{f.pperm(x, p0, p1, ind.exact=TRUE, np=0)}
+\usage{pperm(x, p0, p1, ind.exact=TRUE, np=0)}
 \description{The function computes a matrix of gene set p values. Each column in the matrix is a set of p values (for the rows of
 the matrix) corresponding to a permutation of the columns of the original expression matrix.}
 \value{matrix of p values corresponding to a permutation of the columns of the expression matrix}
@@ -13,5 +13,5 @@ the matrix) corresponding to a permutation of the columns of the original expres
 whether random permutations should be used (FALSE)}
 \item{np}{is the number of random permutations, if ind.exact != TRUE.
 TODO turn into real (executable) example
-Example: ypp <- f.pperm(dma.norm, 1:4, 5:8, ind.exact = TRUE, 1))
-Example: ypp <- f.pperm(dma.norm, 1:4, 5:8, ind.exact = FALSE, 100))}}
+Example: ypp <- pperm(dma.norm, 1:4, 5:8, ind.exact = TRUE, 1))
+Example: ypp <- pperm(dma.norm, 1:4, 5:8, ind.exact = FALSE, 100))}}

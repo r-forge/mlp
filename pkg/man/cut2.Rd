@@ -1,7 +1,7 @@
-\name{f.cut2}
-\alias{f.cut2}
+\name{cut2}
+\alias{cut2}
 \title{function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size...}
-\usage{f.cut2(w0, w, q.cutoff)}
+\usage{cut2(w0, w, q.cutoff)}
 \description{function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size}
 \value{vector of p values for each gene set}
 \arguments{\item{w0}{vector of observed gene set statistics

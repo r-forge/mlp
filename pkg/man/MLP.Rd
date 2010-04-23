@@ -1,7 +1,7 @@
-\name{f.MLP}
-\alias{f.MLP}
+\name{MLP}
+\alias{MLP}
 \title{This function calculates p-values for each gene set based on row permutations...}
-\usage{f.MLP(geneSet, genePValue, minGenes=5, maxGenes=100,
+\usage{MLP(geneSet, genePValue, minGenes=5, maxGenes=100,
     rowPermutations=TRUE, nPermutations=10, smoothPValues=TRUE)}
 \description{This function calculates p-values for each gene set based on row permutations
 of the gene p values or column permutations of the expression matrix; the p values

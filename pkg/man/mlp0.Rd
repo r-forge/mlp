@@ -1,7 +1,7 @@
-\name{f.mlp0}
-\alias{f.mlp0}
+\name{mlp0}
+\alias{mlp0}
 \title{This function calculates the mean of the gene-statistic y[, 2] (the MLP statistic)...}
-\usage{f.mlp0(geneSet, genePValue, mappingFunctionOutput)}
+\usage{mlp0(geneSet, genePValue, mappingFunctionOutput)}
 \description{This function calculates the mean of the gene-statistic y[, 2] (the MLP statistic)
 for each unique gene-set in x[, 1].}
 \value{data frame with two columns; first column contains the number of genes

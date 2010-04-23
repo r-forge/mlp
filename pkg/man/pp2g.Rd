@@ -1,7 +1,7 @@
-\name{f.pp2g}
-\alias{f.pp2g}
+\name{pp2g}
+\alias{pp2g}
 \title{Function to convert probeset datasets to gene datasets...}
-\usage{f.pp2g(xp, yp)}
+\usage{pp2g(xp, yp)}
 \description{Function to convert probeset datasets to gene datasets
 (deprecated) 
 TODO look for BioConductor based equivalent}

@@ -8,9 +8,6 @@ load(pathExampleData)
 
 #Libraries needed
 library(limma)
-library(affy)
-library(GO.db)
-library(AnnotationDbi)
 library(org.Mm.eg.db) # for mouse
 
 exprs(expressionSetGcrma)[1:2,]
@@ -45,8 +42,8 @@ normDat  <- normalizeQuantiles(exprs(expressionSetGcrma), ties=TRUE)
 subGroup <- pData(expressionSetGcrma)$subGroup
 design <- model.matrix(~ -1 +factor(subGroup ))
 
-colnames(design) <- c("group1","group2")
-contrast.matrix <- makeContrasts(group1-group2,levels=design)
+colnames(design) <- c("group1", "group2")
+contrast.matrix <- makeContrasts(group1-group2, levels=design)
 fit <- lmFit(normDat,design)
 fit2 <- contrasts.fit(fit, contrast.matrix)
 fit2 <- eBayes(fit2)
@@ -57,7 +54,8 @@ normDat.p[1:5]
 
 ##=================================================INPUTS FOR MLP==========================================
 
-go.eSet <- f.GOAnnotation(Org="Mouse", Onto="BP", fNames=featureNames(expressionSetGcrma),nMin=5,nMax=100)
+go.eSet <- goAnnotation(organism="Mouse", ontology="BP", featureNames = featureNames(expressionSetGcrma),
+    minGenes = 5, maxGenes = 100)
 go.eSet[1:3]
 #$`GO:0000002`
 #[1] "18975"  "27393"  "27395"  "27397"  "83945"  "382985"
@@ -69,7 +67,7 @@ go.eSet[1:3]
 #$`GO:0000038`
 #[1] "15488"  "19305"  "54326"  "94180"  "171281" "217698"
 
-x <- f.GOInputMLP(go.eSet) ###First Input for MLP (both columns are numeric).
+x <- goInputMLP(go.eSet) ###First Input for MLP (both columns are numeric).
 x[1:10,]
 #   GO Gene.ID
 #1   2   18975
@@ -83,17 +81,18 @@ x[1:10,]
 #9  18   12487
 #10 18   13990
 
-y <- data.frame("Entrez.ID"= as.numeric(featureNames(expressionSetGcrma)),"p.Value"=normDat.p)
-#Warning message:
-#In data.frame(Entrez.ID = as.numeric(featureNames(expressionSetGcrma)),  :
-#  NAs introduced by coercion
+y <- data.frame("Entrez.ID"= as.numeric(featureNames(expressionSetGcrma)),
+    "p.Value"=normDat.p)
+# Warning message:
+# In data.frame(Entrez.ID = as.numeric(featureNames(expressionSetGcrma)),  :
+#   NAs introduced by coercion
 
 dim(y)
-#[1] 16395     2
+# [1] 16395     2
 
-y <- as.matrix(na.omit(y))  ###Deletes all rows with non-numeric featureNames.
+y <- as.matrix(na.omit(y))  # Deletes all rows with non-numeric featureNames.
 dim(y)
-#[1] 16331     2
+# [1] 16331     2
 
 y[1:10,]
 #          Entrez.ID group1...group2
@@ -109,11 +108,12 @@ y[1:10,]
 #100038635 100038635       0.3272610
 
 ###==============================================RUN MLP===========================================
+out.MLP <- MLP(geneSet = x, genePValue = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
+    nPermutations = 6, smoothPValues = TRUE)
 
-out.MLP <- f.MLP(x = x, y = y, nmin = 5, nmax = 100, ind.sim = TRUE, nsim = 6, ind.smooth = TRUE)
-# tmp <- summary(x1 = go.eSet,x2 = out.MLP)
+tmp <- summary(object = out.MLP, goInFeatureNames = go.eSet)
 
-# tmp[1:10,]
+tmp[1:10,]
 #        Geneset
 #943  GO:0015718
 #660  GO:0007565
