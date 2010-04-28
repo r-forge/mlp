@@ -309,17 +309,16 @@ pp2g <- function(xp, yp){
 
 ###=======================================CUTOFFS========================
 
-#' function to define the cutoffs to be used for each individual gene set statistic;
-#' @param w0 vector of observed gene set statistics
-#' TODO rename to observedGenesetStats
-#' @param w matrix of gene set statistics based on the permutation procedure
-#' TODO rename to permutationGenesetStats
+#' Function to define the cutoffs to be used for each individual gene set statistic;
+#' @param observedGenesetStats dataframe as returned by mlpStatistic 
+#' @param permutationGenesetStats output of MLP except for the geneset size column; 
+#'   matrix of gene set statistics based on the permutation procedure
 #' @return vector of p values for each gene set
 #' @export
-cut0 <- function(w0, w){
+getIndividualPValues <- function(observedGenesetStats, permutationGenesetStats){
   # individual cut-offs
-  w1 <- matrix(rep(w0[, 2], ncol(w)), nrow = nrow(w0), ncol = ncol(w))
-  dw0w1 <-  ifelse(w1 - w > 0, 1, 0)
+  w1 <- matrix(rep(observedGenesetStats[, 2], ncol(permutationGenesetStats)), nrow = nrow(observedGenesetStats), ncol = ncol(permutationGenesetStats))
+  dw0w1 <-  ifelse(w1 - permutationGenesetStats > 0, 1, 0)
   pw0 <- 1 - rowMeans(dw0w1) 
   return(pw0)
 }
@@ -336,52 +335,54 @@ cut0 <- function(w0, w){
 #  return(pval)
 #}
 
-#' function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size
-#' @param w0 vector of observed gene set statistics
-#' TODO rename to observedGenesetStats
-#' @param w matrix of gene set statistics based on the permutation procedure
-#' TODO rename to permutationGenesetStats
+#' Function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size;
+#' it calls ee1 and ctpval1 to create smoothed quantile curves and calculate the corresponding
+#' p values for the geneset.  
+#' @param observedGenesetStats dataframe as returned by mlpStatistic 
+#' @param permutationGenesetStats output of MLP except for the geneset size column; 
+#'   matrix of gene set statistics based on the permutation procedure
 #' @param q.cutoff vector of quantiles at which p values for each gene set are desired (to be
 #'   specified by the users)
-#' TODO rename to criticalValuesGeneset  
+#' @param df degrees of freedom used for the smoothing splines used to calculate the smoothed quantile curves; defaults to 9.  
 #' @return vector of p values for each gene set
 #' @export
-cut2 <- function(w0, w, q.cutoff){
+getSmoothedPValues <- function(observedGenesetStats, permutationGenesetStats, q.cutoff, df = 9){
   ### This imposes the decreasing criterion and has df =9
-  ### SMOOTHED CUTOFFS :Uses ee, ctpval and related functions from Javier's code. 
-  w1 <- cbind(rep(w0[,1], ncol(w[,])), as.vector(w[,]))
+  w1 <- cbind(rep(observedGenesetStats[,1], ncol(permutationGenesetStats[,])), as.vector(permutationGenesetStats[,]))
   lqi = NULL; hqi= q.cutoff
   ### work <- ee1(x=sqrt(w1[,1]), y=w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = F, plot = T, flag = F, dg = 15, logtran = F)
-  work <- ee1(x = sqrt(w1[,1]), y = w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = FALSE, plot = TRUE, flag = FALSE, dg = 9, logtran = FALSE)
-  pval <- ctpval1(work, nch=6)
+  work <- quantileCurves(x = sqrt(w1[, 1]), y = w1[, 2], x0 = sqrt(observedGenesetStats[,1]), y0 = observedGenesetStats[,2],
+      type = "dec", m = 20, lqi = lqi, hqi = hqi, sym = FALSE, plot = TRUE, flag = FALSE, 
+      df = df, logtran = FALSE)
+  pval <- ctpval1(work, q.cutoff = q.cutoff)
   rm(work)
   return(pval)
 }
 
-#' TODO
-#' @param x TODO
-#' @param y TODO
-#' @param x0 TODO
-#' @param y0 TODO
-#' @param type one of "none", "dec" or "inc"
-#' @param m defaults
-#' @param lqi TODO
-#' @param hqi TODO
-#' @param sym TODO
-#' @param plot TODO
-#' @param flag TODO
-#' @param dg TODO
-#' @param logtran TODO
-#' @return TODO
+#' Function used to calculate the quantile curves; the function is mainly used by ctpval1
+#' @param x x coordinates of the points used to generate the smoothed quantile curves
+#' @param y y coordinates of the points used to generate the smoothed quantile curves
+#' @param x0 x coordinates for the observed data points; by default
+#' @param y0 y coordinates for the observed data points
+#' @param type constraints to the smoothed quantile curve, one of "none" (default), "dec" (decreasing) or 
+#'   "inc" (increasing)
+#' @param m block size for constructing the smoothed quantile curve (which defines the neighborhood
+#'   of the geneset); defaults to 20.
+#' @param lqi vector of the percentiles at which the lower quantile curve is desired
+#' @param hqi vector of the percentiles at which the upper quantile curve is desired
+#' @param sym logical; should the curves be symmetric (TRUE) or not (FALSE); one does not expect it to
+#'   be symmetric, so the argument defaults to FALSE.
+#' @param plot logical; should a plot be generated for the results ? Defaults to TRUE.
+#' @param flag logical; if TRUE an alternative method is used to compute the quantiles which will be faster
+#'   but less accurate for large datasets than when using the apply function; defaults to FALSE. 
+#' @param df degrees of freedom for the smoothing spline
+#' @param logtran whether whether or not to log-transform the x's and y's to calculate the smoothed
+#'   quantile curves
+#' @return matrix with the y0 values in the first column, the quantiles at x0 (as many columns as is specified in lqi and hqi) 
+#'   and the x0 values in the last column
 #' @export 
-ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
-    sym = FALSE, plot = TRUE, flag = FALSE, dg = 15, logtran = FALSE) {
-#  x, y are the coordinates of the points used to generate the
-#       envelope.
-#  x0, y0 are the points that are graphed with the envelop.
-#        By default x0=x y0=y
-#  type:  constraints to the envelop function, one of increasing ("inc"), decreasing ("dec") or none ("none", default). 
-#  m: block size for constructing the quantile envelop
+quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
+    sym = FALSE, plot = TRUE, flag = FALSE, df = 15, logtran = FALSE) {
   
   type <- match.arg(type)
   
@@ -394,7 +395,7 @@ ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lq
   }
   
   if (sym) {
-    qi <- unique(sort(pmax(qi,1-qi)))
+    qi <- unique(sort(pmax(qi, 1-qi)))
     lqi <- NULL
     y1 <- abs(y)
   } else {
@@ -417,7 +418,7 @@ ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lq
   if(!sym) { 
     xmed <- zz[round(m/2), ]
     xq2  <- t(t(xq2) - xmed)
-    ymed <- predict(smooth.spline(xp2,xmed,df=dg), x)$y
+    ymed <- predict(smooth.spline(xp2,xmed,df=df), x)$y
     y1   <- y1-ymed
   } else { 
     xmed <- rep(0, ncol(zz))
@@ -425,7 +426,7 @@ ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lq
   } 
   
   tt <- function(xq, qq) {
-    xxtp <- smooth.spline(xp2,xq,df=dg)
+    xxtp <- smooth.spline(xp2,xq,df=df)
     w <- predict(xxtp,x)$y
     kc <- quantile(y1/w, if(qq>0.5) qq else 1-qq)       
     w <- predict(xxtp, x)$y * kc + ymed
@@ -433,7 +434,7 @@ ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lq
   }
   
   vv <- function(xq, qq) {
-    xxtp <- smooth.spline(xp2,xq+xmed,df=dg)
+    xxtp <- smooth.spline(xp2,xq+xmed,df=df)
     w <- smdecreasing1(xxtp,x,decreasing=down)
     kc <- quantile((y1)/(w-ymed),if(qq>0.5) qq else 1-qq)       
     zz <- (w-ymed)*kc+ymed
@@ -453,10 +454,10 @@ ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lq
     if (type == "inc") down <- FALSE
     else if(type=="dec") down <- TRUE
     if (length(qi) == 1) {
-      xtp <- vv(xq2,qi)
+      xtp <- vv(xq2, qi)
     } else {
       xtp <- vv(c(xq2[1,]), qi[1])
-      for(i in 2:length(qi))
+      for (i in 2:length(qi))
         xtp <- cbind(xtp, vv(c(xq2[i,]), qi[i]))    
     }
   }
@@ -497,57 +498,74 @@ ee1 <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lq
   cbind(T = c(y0), xtp, Sp=x0)
 }
 
-# TODO document
-smdecreasing1 <- function(z, w, decreasing=TRUE) {
-# z output of smooth.spline with x component sorted.
-# The y component of z must be non increasing, if not the 
-#    function willmake it non-increasing
-# Extrapolations are linear
+# TODO: clarify the 'Extrapolations are linear' comment (and include in a Details section of the help page)
+
+#' This function is used by ee1 when its type argument specifies monotonic non-increasing curves or
+#' monotonic non-decreasing curves.
+#'  
+#' @param z output of smooth.spline with x component sorted; if z is a plain vector, w is used as the
+#'   y variable. The y component of z must be non-increasing, if not the function will make it non-increasing  
+#' @param w vector of y values in case z is a plain vector of x values 
+#' @param decreasing logical; if TRUE, specifies the curve to be non-increasing, if FALSE specifies the
+#'   curve to be non-decreasing
+#' @return vector of y values with the monotonicity constraint imposed
+#' @export
+smdecreasing1 <- function(z, w, decreasing = TRUE) {
+  
   x <- z$x
   if(decreasing) y <- z$y else y <- (-z$y)
   rx <- range(x)
   rw <- range(w)
   n <- length(x)
   while (any(diff(y) > 0)) 
-    y <- pmax(y,y[c(2:n,n)])
+    y <- pmax(y, y[c(2:n,n)])
   i1 <- (w < rx[1])
   i2 <- (w > rx[2])
   i <- !(i1|i2)
   w1 <- w
-  if(any(i)) w1[i] <- approx( x,y,w[i])$y
-  if(any(i1)) { 
+  if (any(i)) w1[i] <- approx(x, y, w[i])$y
+  if (any(i1)) { 
     m1 <- lsfit(x[1:20],y[1:20])$coef[2]
     w1[i1] <- approx( c(rw[1],x[1]),c(y[1]-m1*(x[1]-rw[1]),y[1]),w[i1])$y
   }
-  if(any(i2)) { 
+  if (any(i2)) { 
     m2 <- lsfit(x[n-0:19],y[n-0:19])$coef[2]
     w1[i2] <- approx( c(x[n],rw[2]),c(y[n],y[n]-m2*(x[n]-rw[2])),w[i2])$y
   }
   if (decreasing) w1 else -w1
 }
 
+#' Function for column sorting of a matrix x
+#' @param x 
+#' @return sorted matrix 
+#' @export
 csort <- function(x) { 
   n  <- nrow(x)
   p  <- ncol(x)
   rx <- range(x)
   z  <- (x - rx[1])/(rx[2]-rx[1])*0.99
   k <- rep(1:p,rep(n,p))
-  z  <- x[sort.list( z + k)]
+  z  <- x[sort.list(z + k)]
   dim(z) <- dim(x)
   z
 }
 
-ctpval1 <- function(x.ct,nch=6) {
+#' This function interpolates between the smoothed quantile curves to determine the p value for a given geneset
+#' @param x.ct output of ee1, i.e. the curves of the contours for the different quantiles 
+#' @param q.cutoff critical values
+#' @return actual p values for each geneset
+#' @export
+ctpval1 <- function(x.ct, q.cutoff) {
   p <- ncol(x.ct) 
   pr <- 2:(p-1)
   x <- log(x.ct[,pr])
   n <- nrow(x.ct)
   p2 <- p-2
-  u <- as.numeric(substring(dimnames(x.ct)[[2]][pr], nch))
+  u <- q.cutoff # as.numeric(substring(dimnames(x.ct)[[2]][pr], nch))
   y <- log(-log(1-u))
-  xm <- c(x%*%rep(1,p2)/p2)
-  x2 <- (x-xm)^2 %*%rep(1,p2)
-  xy <- (x-xm)%*%(y-mean(y))
+  xm <- c(x %*% rep(1,p2)/p2)
+  x2 <- (x-xm)^2 %*% rep(1,p2)
+  xy <- (x-xm) %*% (y-mean(y))
   b <- xy / x2
   m <- mean(y) - b*xm
   exp(-exp(m + b*log(abs(x.ct[,1]))))
@@ -555,6 +573,8 @@ ctpval1 <- function(x.ct,nch=6) {
 
 
 ###==================================SIMULATION========================
+
+# TODO make df an input parameter for MLP (which is then fed into the cut2 function)
 
 #' This function calculates p-values for each gene set based on row permutations
 #' of the gene p values or column permutations of the expression matrix; the p values
@@ -573,10 +593,12 @@ ctpval1 <- function(x.ct,nch=6) {
 #' @param nPermutations is the number of simulations.
 #' @param smoothPValues logical indicating whether one wants to calculate smoothed cut-off thresholds (TRUE; default)
 #'    or not (FALSE).
+#' @param criticalValues vector of quantiles at which p values for each gene set are desired 
 #' @return data frame with three columns: genesetSize, genesetStatistic and genesetPValue.
 #' @references TODO
 #' @export
-MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 10, smoothPValues = TRUE){
+MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 10, smoothPValues = TRUE, 
+    criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999)){
   
   if (!is.numeric(geneSet)){
     warning("Input x should be numeric")
@@ -624,9 +646,9 @@ MLP <- function(geneSet, genePValue, minGenes = 5, maxGenes = 100, rowPermutatio
     if (!rowPermutations){
       warning("Cannot smooth p-values if ind.sim = FALSE")
     }
-    pw0 <- cut2(w0[i,], w, q.cutoff = c(0.5,0.9,0.95,0.99,0.999,0.9999,0.99999))
+    pw0 <- getSmoothedPValues(w0[i,], w, q.cutoff = criticalValues)
   } else {
-    pw0 <- cut0(w0[i,], w)
+    pw0 <- getIndividualPValues(w0[i,], w)
   }
   
   res <- data.frame(genesetSize = w0[i,1], genesetStatistic = w0[i,2], genesetPValue = pw0)

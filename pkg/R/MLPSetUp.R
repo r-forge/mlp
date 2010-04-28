@@ -1,19 +1,3 @@
-
-
-
-
-###==============================================ANNOTATION FUNCTIONS===========================================
-
-
-###Required Libraries:
-
-###Organism library:
-# library(affy)
-# library(org.Hs.eg.db)   ### library(org.Mm.eg.db)  ### library(org.Rn.eg.db)
-# library(GO.db)
-# library(affy)
-# library(AnnotationDbi)
-
 # TODO integrate goAnnotation inside MLP and change MLP to have genes and
 # GO terms as character rather than numeric
 
@@ -38,21 +22,31 @@ goAnnotation <- function(organism = "Mouse", ontology = "BP",
   if (!ontology %in% c("MF", "BP", "CC"))
 	  stop("The 'ontology' argument should be one of 'MF', 'BP' or 'CC'.")
   
-  switch(organism,
-      Mouse = {
-        require(org.Mm.eg.db)
-        goToEntrez <- as.list(org.Mm.egGO2ALLEGS) # TODO
-      },
-      Human = {
-        require(org.Hs.eg.db)
-        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
-      },
-      Rat = {
-        require(org.Rn.eg.db)
-        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
-      }
-  )
-  
+#  switch(organism,
+#      Mouse = {
+#        require(org.Mm.eg.db)
+#        goToEntrez <- as.list(org.Mm.egGO2ALLEGS) # TODO
+#      },
+#      Human = {
+#        require(org.Hs.eg.db)
+#        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
+#      },
+#      Rat = {
+#        require(org.Rn.eg.db)
+#        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
+#      }
+#  )
+#  
+  if (organism == "Mouse"){
+    require(org.Mm.eg.db)
+    goToEntrez <- as.list(org.Mm.egGO2ALLEGS) # TODO
+  } else if (organism == "Human"){
+    require(org.Hs.eg.db)
+    goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
+  } else { # Rat
+    require(org.Rn.eg.db)
+    goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
+  }
   # create first input object with GO info
   allGOontol <- eapply(GOTERM, Ontology)  
   allGOTerm  <- eapply(GOTERM, Term)
