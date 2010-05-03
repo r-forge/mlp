@@ -13,6 +13,7 @@
 #' @param maxGenes maximum number of genes in a gene set; defaults to 100
 #' @return data structure to be used as geneSet argument for goInputMLP; list
 #' of GO terms each of which has a list of Entrez IDs as a vector
+#' @import AnnotationDbi
 #' @export
 goAnnotation <- function(organism = "Mouse", ontology = "BP", 
 		featureNames, minGenes = 5, maxGenes = 100){

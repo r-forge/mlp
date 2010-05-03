@@ -1,8 +1,8 @@
 \name{smdecreasing1}
 \alias{smdecreasing1}
-\title{This function is used by ee1 when its type argument specifies monotonic non-increasing curves or...}
+\title{This function is used by quantileCurves when its type argument specifies monotonic non-increasing curves or...}
 \usage{smdecreasing1(z, w, decreasing=TRUE)}
-\description{This function is used by ee1 when its type argument specifies monotonic non-increasing curves or
+\description{This function is used by quantileCurves when its type argument specifies monotonic non-increasing curves or
 monotonic non-decreasing curves.}
 \value{vector of y values with the monotonicity constraint imposed}
 \arguments{\item{z}{output of smooth.spline with x component sorted; if z is a plain vector, w is used as the

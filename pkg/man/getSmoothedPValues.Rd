@@ -4,7 +4,7 @@
 \usage{getSmoothedPValues(observedGenesetStats, permutationGenesetStats,
     q.cutoff, df=9)}
 \description{Function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size;
-it calls ee1 and ctpval1 to create smoothed quantile curves and calculate the corresponding
+it calls quantileCurves and ctpval1 to create smoothed quantile curves and calculate the corresponding
 p values for the geneset.}
 \value{vector of p values for each gene set}
 \arguments{\item{observedGenesetStats}{dataframe as returned by mlpStatistic}
