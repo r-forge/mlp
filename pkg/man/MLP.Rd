@@ -2,7 +2,9 @@
 \alias{MLP}
 \title{This function calculates p-values for each gene set based on row permutations...}
 \usage{MLP(geneSet, genePValue, minGenes=5, maxGenes=100,
-    rowPermutations=TRUE, nPermutations=10, smoothPValues=TRUE)}
+    rowPermutations=TRUE, nPermutations=10, smoothPValues=TRUE,
+    criticalValues=c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999),
+    df=9)}
 \description{This function calculates p-values for each gene set based on row permutations
 of the gene p values or column permutations of the expression matrix; the p values
 can be obtained either as individual gene set p values or p values based on smoothing
@@ -21,4 +23,6 @@ for gene set size)}
 permutations (FALSE)}
 \item{nPermutations}{is the number of simulations.}
 \item{smoothPValues}{logical indicating whether one wants to calculate smoothed cut-off thresholds (TRUE; default)
-or not (FALSE).}}
+or not (FALSE).}
+\item{criticalValues}{vector of quantiles at which p values for each gene set are desired}
+\item{df}{degrees of freedom for the smooth.spline function used in getSmoothedPValues}}
