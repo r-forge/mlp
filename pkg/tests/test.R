@@ -67,8 +67,8 @@ go.eSet[1:3]
 #$`GO:0000038`
 #[1] "15488"  "19305"  "54326"  "94180"  "171281" "217698"
 
-x <- goInputMLP(go.eSet) ###First Input for MLP (both columns are numeric).
-x[1:10,]
+# x <- goInputMLP(go.eSet) ###First Input for MLP (both columns are numeric).
+# x[1:10,]
 #   GO Gene.ID
 #1   2   18975
 #2   2   27393

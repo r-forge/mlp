@@ -114,14 +114,12 @@ summary.MLP <- function(object, goInFeatureNames, ...){
 	allGOTerm  <- eapply(GOTERM, Term)
 	geneSetNames <- names(goInFeatureNames)
 	nGenesInGeneset <- unlist(lapply(goInFeatureNames, length))
-	genesetData <- data.frame("Geneset" = geneSetNames, 
-			"Geneset.Name" = unlist(allGOTerm[geneSetNames]),
-			"Geneset.Size" = nGenesInGeneset)
 	
-	returnValue <- data.frame(genesetData, object[, c("genesetStatistic", "genesetPValue")])
-	rownames(returnValue) <- 1:nrow(returnValue)
+	returnValue <- data.frame(genesetSize = nGenesInGeneset, object[, c("genesetStatistic", "genesetPValue")],
+			genesetName = unlist(allGOTerm[geneSetNames]))
 	
-	returnValue <- returnValue[order(returnValue[,5]),]
+	returnValue <- returnValue[order(returnValue[,"genesetPValue"]),]
+	row.names(returnValue) <- geneSetNames
 	
 	return(returnValue)
 }
