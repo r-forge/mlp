@@ -103,7 +103,9 @@ goInputMLP <- function(goInFeatureNames){
 #'   the MLP results with the biological description of the
 #'   gene sets
 #' @param object object of class 'MLP' as produced by the 'MLP' function 
-#' @param goInFeatureNames 
+#' @param goInFeatureNames list of gene sets; each gene set (component) contains
+#'   the member genes as a character vector. Typically, the output of goAnnotation
+#'   is used.  
 #' @param ... further arguments; currently none are used
 #' @return TODO
 #' @method summary MLP
@@ -116,7 +118,7 @@ summary.MLP <- function(object, goInFeatureNames, ...){
 	nGenesInGeneset <- unlist(lapply(goInFeatureNames, length))
 	
 	returnValue <- data.frame(genesetSize = nGenesInGeneset, object[, c("genesetStatistic", "genesetPValue")],
-			genesetName = unlist(allGOTerm[geneSetNames]))
+			genesetDescription = unlist(allGOTerm[geneSetNames]))
 	
 	returnValue <- returnValue[order(returnValue[,"genesetPValue"]),]
 	row.names(returnValue) <- geneSetNames

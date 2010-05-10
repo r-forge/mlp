@@ -3,11 +3,15 @@
 #' @return vector of column means of -log10(x) 
 #' @export
 computeMLP <- function(x){
-  if (is.data.frame(x)){
-      colMeans(-log10(data.matrix(x))) # TODO remove data.matrix once geneStatistic is fixed	
+  x <- as.matrix(x)
+  if (ncol(x) > 1){
+      retval <- c(nrow(x), colMeans(-log10(data.matrix(x))))
+	  names(retval) <- c("n", paste("u", 1:ncol(x), sep = ""))
   } else {
-     mean(-log10(x))		
+     retval <- c(length(x), mean(-log10(x)))
+	 names(retval) <- c("n", "u")
   }
+  return(retval)
 }
 
 #' This function calculates the mean of the gene-statistic y[, 2] (the MLP statistic)
@@ -22,16 +26,8 @@ computeMLP <- function(x){
 #'    in the gene set; the second column contains the MLP statistic (u) for the gene set.
 #' @export
 mlpStatistic <- function(geneSetPValues){
-  n <- sapply(geneSetPValues, length)
-  u <- sapply(geneSetPValues, computeMLP)
- 
-#  if (ncol(geneStatistic) == 2){
-#	  retval <- cbind(n, u)
-#	  colnames(retval) <- c("genesetSize", "genesetStatistic")
-#  } else { # column permutations
-	  retval <- cbind(n, u)
-      return(retval)
-#  }
+  retval <- sapply(geneSetPValues, computeMLP)
+  return(retval)
 }
 
 #' Calculate all unique permutations for 1:n, with k = 2 in each group
@@ -206,7 +202,7 @@ rssp <- function(x1, x2) rsp(x1, x2) * sqrt(1 / ncol(x1) + 1 / ncol(x2))
 
 mapGenesetStatistic <- function(geneSet, geneStatistic){
 	myfun <- function(x){
-		rv <- geneStatistic[geneStatistic[,1] %in% x, 2:ncol(geneStatistic)]
+		rv <- geneStatistic[row.names(geneStatistic) %in% x, ]
 		return(rv)
 	}
 	retval <- lapply(geneSet, myfun)
@@ -329,8 +325,11 @@ quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"),
     sym = FALSE, plot = TRUE, flag = FALSE, df = 15, logtran = FALSE) {
   
   type <- match.arg(type)
+  if (is.null(lqi) & is.null(hqi))
+	  stop("Please provide at least one of 'lqi' or 'hqi'.")
   
-  qi <- c(sort(lqi), sort(hqi))
+  qi <- if (!is.null(lqi)) c(sort(lqi), sort(hqi)) else sort(hqi)
+  
   if (logtran){
     x <- log(x)
     x0 <- log(x0)
@@ -366,7 +365,7 @@ quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"),
     y1   <- y1-ymed
   } else { 
     xmed <- rep(0, ncol(zz))
-    ymed= rep(0, n) 
+    ymed <- rep(0, n) 
   } 
   
   tt <- function(xq, qq) {
@@ -413,14 +412,13 @@ quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"),
   }
   plot(x0, y0, xlab="n", ylab="MLP", axes=FALSE, col="#08306B", pch=".")
   axis(2, lwd = 1.5, col="#08306B")
-  atPositions <-(axis(1, labels = FALSE))
-  axis(1,lwd = 1.5, at = atPositions, labels = atPositions^2, las = 1, col = "#08306B")
+  atPositions <- axis(1, labels = FALSE)
+  axis(1, lwd = 1.5, at = atPositions, labels = atPositions^2, las = 1, col = "#08306B")
   par(cex = 0.5)
   npc <- 16
   ccc <- "#2171B5"
   if (!is.null(hqi)){ 
     i2 <- y0 > xtp[,length(qi)]
-    print(length(i2[i2==TRUE]))
     points(x0[i2], y0[i2], col = ccc, pch = npc) 
     if (length(i2[i2 == TRUE]) > 0){
       text(x = x0[i2], y = jitter(y0[i2], factor=4), labels = names(x0[i2]), cex = 1.25, col = "#08306B")
@@ -520,8 +518,9 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #' can be obtained either as individual gene set p values or p values based on smoothing
 #' across gene sets of similar size.
 #' @param geneSet is the input list of gene-sets (components) and gene-IDs (character vectors). (GO category and Gene ID)
-#' @param geneStatistic is the input table (two-column numeric matrix) of gene-ids and pvalues (or other summary statistic).
-#' TODO gene-IDs consistent with gene ID's in x (i.e. character vector)
+#' @param geneStatistic is either a named numeric vector (if rowPermutations is TRUE)
+#'   or a numeric matrix of pvalues (if rowPermutations is FALSE). The names of the numeric vector
+#'   or row names of the matrix should represent the gene IDs.
 #' @param minGenes minimum number of genes in a gene set for it to be considered (lower threshold
 #'    for gene set size)
 #' @param maxGenes maximum number of genes in a gene set for it to be considered (upper threshold
@@ -542,9 +541,14 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
   if (!is.list(geneSet)){
     stop("The 'geneSet' should be a list of gene sets where for each gene set the gene IDs as a character vector")
   }
-  if (!is.numeric(geneStatistic)){
-    warning("Input 'genePValue' should be numeric")
-    geneStatistic <- toArray(geneStatistic)
+  
+  if (is.vector(geneStatistic))
+	  if (!rowPermutations)
+		  stop("If rowPermutations is set to FALSE, the 'geneStatistic' needs to be a matrix")
+	  geneStatistic <- as.matrix(geneStatistic)
+  
+  if (!is.numeric(geneStatistic) & !is.matrix(geneStatistic)){
+    warning("Argument 'geneStatistic' should be a numeric vector or matrix")
   }
   
   if (!rowPermutations){
@@ -556,7 +560,7 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
   geneSet <- geneSet[genesetIndices]
   
   ### Remove missing values from x and y.
-  geneStatistic <- geneStatistic[!is.na(geneStatistic[, 2]), ]
+  geneStatistic <- na.omit(geneStatistic)
   
   mapResult <- mapGenesetStatistic(geneSet, geneStatistic)
   
@@ -573,20 +577,21 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
   # n1 <- length(unique(geneSet[,1]))
   n2 <- nrow(geneStatistic)
   
-  w0 <- mlpStatistic(reducedMapResult, geneStatistic[, 1:2])
+  w0 <- t(mlpStatistic(reducedMapResult))
   
   # Only relevant rows of x to reduce downstream computations.
 
-  n11 <- length(unique(geneSet[,1]))
+  n11 <- length(geneSet)
   
   ### Create simulation data:
   if (!rowPermutations){
     ## Column Permutations
-    w <- mlpStatistic(reducedMapResult, geneStatistic[,-2])[,-1]
+    w <- mlpStatistic(reducedMapResult)
   } else {
     ## Row Permutations
     p1 <- apply(matrix(1:n2, n2, nPermutations), 2, sample) # need "matrix" to resample each column separately. 
-    y1 <- data.frame(Gene=I(geneStatistic[,1]),matrix(geneStatistic[p1,2],n2,nPermutations))
+    y1 <- matrix(geneStatistic[p1, 1], n2, nPermutations)
+	row.names(y1) <- row.names(geneStatistic) 
     rm(p1)
 	
 	mapResultPermuted <- mapGenesetStatistic(reducedGeneset, y1)
@@ -598,12 +603,12 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
     if (!rowPermutations){
       warning("Cannot smooth p-values if ind.sim = FALSE")
     }
-    pw0 <- getSmoothedPValues(w0[i, ], w, q.cutoff = criticalValues, df = df)
+    pw0 <- getSmoothedPValues(w0, w[,-1], q.cutoff = criticalValues, df = df)
   } else {
-    pw0 <- getIndividualPValues(w0[i, ], w)
+    pw0 <- getIndividualPValues(w0, w)
   }
   
-  res <- data.frame(genesetSize = w0[i,1], genesetStatistic = w0[i,2], genesetPValue = pw0)
+  res <- data.frame(genesetSize = w0[ ,1], genesetStatistic = w0[ ,2], genesetPValue = pw0)
   class(res) <- c("MLP", class(res))
   return(res)
 }

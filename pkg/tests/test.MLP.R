@@ -1,5 +1,6 @@
 
 require(MLP)	
+set.seed(479)
 
 # This is just the expressionset for this experiment.
 
@@ -81,73 +82,41 @@ go.eSet[1:3]
 #9  18   12487
 #10 18   13990
 
-y <- data.frame("Entrez.ID"= as.numeric(featureNames(expressionSetGcrma)),
-    "p.Value"=normDat.p)
-# Warning message:
-# In data.frame(Entrez.ID = as.numeric(featureNames(expressionSetGcrma)),  :
-#   NAs introduced by coercion
+y <- normDat.p[,1]
+names(y) <- featureNames(expressionSetGcrma)
 
-dim(y)
-# [1] 16395     2
+y[1:10]
+# 100009600    100012    100017    100019 100034251 100036521 100037258 100037278 
+# 0.4328583 0.7448996 0.6088859 0.1845008 0.2312761 0.7865153 0.7772888 0.1037431 
+# 100038570 100038635 
+# 0.1368744 0.3272610 
 
-y <- as.matrix(na.omit(y))  # Deletes all rows with non-numeric featureNames.
-dim(y)
-# [1] 16331     2
-
-y[1:10,]
-#          Entrez.ID group1...group2
-#100009600 100009600       0.4328583
-#100012       100012       0.7448996
-#100017       100017       0.6088859
-#100019       100019       0.1845008
-#100034251 100034251       0.2312761
-#100036521 100036521       0.7865153
-#100037258 100037258       0.7772888
-#100037278 100037278       0.1037431
-#100038570 100038570       0.1368744
-#100038635 100038635       0.3272610
-
-###==============================================RUN MLP===========================================
-out.MLP <- MLP(geneSet = x, genePValue = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
+out.MLP <- MLP(geneSet = go.eSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
     nPermutations = 6, smoothPValues = TRUE)
 
 tmp <- summary(object = out.MLP, goInFeatureNames = go.eSet)
 
 tmp[1:10,]
-#        Geneset
-#943  GO:0015718
-#660  GO:0007565
-#661  GO:0007566
-#202  GO:0002504
-#201  GO:0002495
-#1074 GO:0019886
-#590  GO:0007163
-#1499 GO:0035088
-#200  GO:0002478
-#1072 GO:0019882
-#                                                                                  Geneset.Name
-#943                                                              monocarboxylic acid transport
-#660                                                                           female pregnancy
-#661                                                                        embryo implantation
-#202  antigen processing and presentation of peptide or polysaccharide antigen via MHC class II
-#201                    antigen processing and presentation of peptide antigen via MHC class II
-#1074         antigen processing and presentation of exogenous peptide antigen via MHC class II
-#590                                              establishment or maintenance of cell polarity
-#1499                                establishment or maintenance of apical/basal cell polarity
-#200                           antigen processing and presentation of exogenous peptide antigen
-#1072                                                       antigen processing and presentation
-#     Geneset.Size MLP.Observed      P.Value
-#943             6    2.4976051 4.357394e-07
-#660            38    0.8221092 1.724650e-03
-#661            17    1.0222076 1.785178e-03
-#202            16    1.0209136 2.217215e-03
-#201            15    1.0367976 2.272937e-03
-#1074           15    1.0367976 2.272937e-03
-#590            23    0.8920877 3.231891e-03
-#1499           12    1.0522212 3.629602e-03
-#200            22    0.8934001 3.684589e-03
-#1072           43    0.7543953 4.324502e-03
+#            genesetSize genesetStatistic genesetPValue
+# GO:0000002          47        0.8484050  1.812210e-08
+# GO:0000018          17        1.0826887  2.794698e-06
+# GO:0000038          10        1.2423499  1.654631e-05
+# GO:0000041          17        1.0291455  1.685600e-05
+# GO:0000045          15        1.0367976  4.477027e-05
+# GO:0000050          15        1.0367976  4.477027e-05
+# GO:0000052          17        0.9905982  5.507421e-05
+# GO:0000060          43        0.7476719  6.437538e-05
+# GO:0000070          25        0.8604682  1.135816e-04
+# GO:0000075          25        0.8570210  1.288780e-04
+#                                                                                          genesetName
+# GO:0000002                                                                          female pregnancy
+# GO:0000018                                                             monocarboxylic acid transport
+# GO:0000038                                                                         tRNA modification
+# GO:0000041                                                                       embryo implantation
+# GO:0000045                   antigen processing and presentation of peptide antigen via MHC class II
+# GO:0000050         antigen processing and presentation of exogenous peptide antigen via MHC class II
+# GO:0000052 antigen processing and presentation of peptide or polysaccharide antigen via MHC class II
+# GO:0000060                                                       antigen processing and presentation
+# GO:0000070                                             establishment or maintenance of cell polarity
+# GO:0000075                                                                      vacuole organization
 
-
-
-###==============================================================================================
