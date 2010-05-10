@@ -23,31 +23,21 @@ goAnnotation <- function(organism = "Mouse", ontology = "BP",
   if (!ontology %in% c("MF", "BP", "CC"))
 	  stop("The 'ontology' argument should be one of 'MF', 'BP' or 'CC'.")
   
-#  switch(organism,
-#      Mouse = {
-#        require(org.Mm.eg.db)
-#        goToEntrez <- as.list(org.Mm.egGO2ALLEGS) # TODO
-#      },
-#      Human = {
-#        require(org.Hs.eg.db)
-#        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
-#      },
-#      Rat = {
-#        require(org.Rn.eg.db)
-#        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
-#      }
-#  )
-#  
-  if (organism == "Mouse"){
-    require(org.Mm.eg.db)
-    goToEntrez <- as.list(org.Mm.egGO2ALLEGS) # TODO
-  } else if (organism == "Human"){
-    require(org.Hs.eg.db)
-    goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
-  } else { # Rat
-    require(org.Rn.eg.db)
-    goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
-  }
+  switch(organism,
+      Mouse = {
+        require(org.Mm.eg.db)
+        goToEntrez <- as.list(org.Mm.egGO2ALLEGS)
+      },
+      Human = {
+        require(org.Hs.eg.db)
+        goToEntrez <- as.list(org.Hs.egGO2ALLEGS)
+      },
+      Rat = {
+        require(org.Rn.eg.db)
+        goToEntrez <- as.list(org.Rn.egGO2ALLEGS)
+      }
+  )
+  
   # create first input object with GO info
   allGOontol <- eapply(GOTERM, Ontology)  
   allGOTerm  <- eapply(GOTERM, Term)
@@ -94,8 +84,6 @@ goInputMLP <- function(goInFeatureNames){
 	return(out)	
 }
 
-#' TODO fix S3 export
-#' TODO 
 #' TODO (low priority currently) add print method for MLP objects
 
 
@@ -108,7 +96,6 @@ goInputMLP <- function(goInFeatureNames){
 #'   is used.  
 #' @param ... further arguments; currently none are used
 #' @return TODO
-#' @method summary MLP
 #' @S3method summary MLP
 #' @export
 summary.MLP <- function(object, goInFeatureNames, ...){

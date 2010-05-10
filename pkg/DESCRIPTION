@@ -2,9 +2,9 @@ Package: MLP
 Type: Package
 Title: MLP
 Version: 0.0-1
-Date: 2009-09-19
+Date: 2010-05-03
 Author: Nandini Raghavan, with contributions by Javier Cabrera,
-    Dhammika Amaratunga, An De Bondt and Tine Casneuf
+    Dhammika Amaratunga, An De Bondt, Tine Casneuf and Tobias Verbeke
 Maintainer: Nandini Raghavan <nraghava@its.jnj.com>
 Description: Mean Log P Analysis
 Depends: GO.db, AnnotationDbi, affy

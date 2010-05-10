@@ -1,7 +1,7 @@
-\name{u}
-\alias{u}
+\name{computeMLP}
+\alias{computeMLP}
 \title{Compute column means of minus log10 of the data...}
-\usage{u(x)}
+\usage{computeMLP(x)}
 \description{Compute column means of minus log10 of the data}
 \value{vector of column means of -log10(x)}
 \arguments{\item{x}{matrix}}
