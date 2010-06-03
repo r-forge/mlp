@@ -106,9 +106,9 @@ summary.MLP <- function(object, goInFeatureNames, ...){
 	
 	returnValue <- data.frame(genesetSize = nGenesInGeneset, object[, c("genesetStatistic", "genesetPValue")],
 			genesetDescription = unlist(allGOTerm[geneSetNames]))
-	
-	returnValue <- returnValue[order(returnValue[,"genesetPValue"]),]
-	row.names(returnValue) <- geneSetNames
+	orderByPValue <- order(returnValue[,"genesetPValue"])
+	returnValue <- returnValue[orderByPValue,]
+	row.names(returnValue) <- geneSetNames[orderByPValue]
 	
 	return(returnValue)
 }
