@@ -559,6 +559,7 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
   
   ### Remove missing values from x and y.
   geneStatistic <- na.omit(geneStatistic)
+  geneStatistic <- geneStatistic[grep("^[[:digit:]]+$", rownames(geneStatistic)),,drop=FALSE]
   
   mapResult <- mapGenesetStatistic(geneSet, geneStatistic)
   

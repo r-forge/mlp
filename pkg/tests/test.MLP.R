@@ -7,7 +7,7 @@ set.seed(479)
 pathExampleData <- system.file("exampleFiles", "expressionSetGcrma.rda", package = "MLP")
 load(pathExampleData)
 
-#Libraries needed
+# Libraries needed
 library(limma)
 library(org.Mm.eg.db) # for mouse
 

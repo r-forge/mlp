@@ -1,3 +1,5 @@
+0.0-3
+   o fix probeset names (exclude non-numeric ones)
 0.0-2
    o fix in summary.MLP
 0.0-1
