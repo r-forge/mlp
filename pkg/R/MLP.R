@@ -15,9 +15,9 @@ computeMLP <- function(x){
 }
 
 #' This function calculates the mean of the gene-statistic y[, 2] (the MLP statistic)
-#'    for each unique gene-set in geneSetpPValues.
-#' @param geneSetPValues is a list of gene-sets; each component of the list (i.e. each gene
-#'   set) contains a vector of p values for the genes in that geneset
+#'    for each unique gene set in geneSetPValues.
+#' @param geneSetPValues is a list of gene sets; each component of the list (i.e. each gene
+#'   set) contains a vector of p values for the genes in that gene set
 #'   respectively
 #' @return data frame with two columns; first column contains the number of genes
 #'    in the gene set; the second column contains the MLP statistic (u) for the gene set.
@@ -74,123 +74,6 @@ permk <- function(gr)
 
 ###======================== MLP-CPERM===================================
 
-#' The function computes a matrix of gene set p values. Each column in the matrix is a set of p values (for the rows of
-#' the matrix) corresponding to a permutation of the columns of the original expression matrix.
-#' The original permutation is identified and removed from the simulated data. 
-#' @param x is the expression data for which the original and column-permuted p-values are calculated.
-#' @param p0 vector of column indices (of x) indicating the control columns. 
-#' @param p1 vector of column indices (of x) indicating the treatment columns.
-#' @param ind.exact logical indicating whether exact permutations should be used (TRUE; default) or
-#'   whether random permutations should be used (FALSE)
-#' @param np is the number of random permutations, if ind.exact != TRUE.
-#' TODO turn into real (executable) example
-#' Example: ypp <- pperm(dma.norm, 1:4, 5:8, ind.exact = TRUE, 1))
-#' Example: ypp <- pperm(dma.norm, 1:4, 5:8, ind.exact = FALSE, 100)) 
-#' @return matrix of p values corresponding to a permutation of the columns of the expression matrix
-#' @export 
-pperm <- function(x, p0, p1, ind.exact = TRUE, np = 0){
-  
-  ### Calculating the p-value of the original t-statistic and replacing NA's with 1.
-  n0 <- length(p0)
-  n  <- ncol(x)
-  nr <- nrow(x)
-  
-  ### Creating the random permutations:
-  if (ind.exact){
-    ### matrix of exact column permutations 
-    pj <- permtwo(n,n0)
-    p0p1String <- paste(c(p0, p1), collapse = "")
-    pj <- pj[-pmatch(p0p1String,
-            apply(pj, 1, function(x) paste(x, collapse = ""))),]
-    np <- nrow(pj)
-    pp <- matrix(NA,nr,(np+1)) 
-    for (j in 1:np){
-      j0 <- pj[j,][1:n0]
-      j1 <- pj[j,][(n0+1):n]
-      pp[,(j+1)] <- tStatistic(x[,j0],x[,j1])[,4]
-      
-    }
-  } else {  
-    pp <- matrix(NA, nr, (np+1))
-    for (j in 1:np){
-      pj <- sample(n)
-      
-      p0p1String <- paste(c(p0, p1), collapse = "")
-      pjString <- paste(pj, collapse = "")
-      
-      if (!is.na(pmatch(p0p1String, pjString))){
-        pj <- sample(n)
-      }
-      j0 <- pj[1:n0]
-      j1 <- pj[(n0+1):n]
-      pp[, (j+1)] <- tStatistic(x[,j0], x[,j1])[,4]
-    }}
-  
-  pp[,1] <- tStatistic(x[,p0],x[,p1])[,4]
-  pp[is.na(pp)] <- 1
-  
-  work <- paste("P", 0:np, sep = "")
-  dimnames(pp) <- list(I(dimnames(x)[[1]]), work)
-  
-  return(pp)
-}
-
-#' Function to compute the t statistic and p values for expression values corresponding to 
-#' two groups; the function applies a correction for small variances, t statistic numerators
-#' and t statistic denominators. 
-#' (this function is deprecated and can be replaced by the corresponding limma version)
-#' @param x matrix of expression values for group one
-#' @param y matrix of expression values for group two
-#' @param var.thresh threshold for the variance (a correction is applied if the variance is 
-#'   smaller than the number passed to var.thresh)
-#' @param num.thresh threshold for the numerator of the t statistic (a correction is applied
-#'   if the numerator is smaller than the number passed to num.thresh)
-#' @param denom.thresh threshold for the denominator of the t statistic (a correction is applied
-#'   if the denominator is smaller than the number passed to denom.thresh)
-#' @return matrix with four columns: numeratorTStatistic, denominatorTStatistic, tStatistic, 
-#'          and pValueTStatistic  
-#' @export
-tStatistic <- function (x, y, var.thresh = 10^-4, num.thresh = 10^(-6), denom.thresh = 10^(-6)) {
-  nx <- (!is.na(x)) %*% rep(1, ncol(x))
-  ny <- (!is.na(y)) %*% rep(1, ncol(y))
-  t.numer <- (rowMeans(x) - rowMeans(y))
-  t.denom <- rssp(x, y)
-  
-  i0 <- rvar(cbind(x, y)) < var.thresh
-  i1 <- abs(t.numer ) < num.thresh & t.denom < denom.thresh
-  i <- i0 | i1
-  t.numer[i] <-  0
-  t.denom[i] <- 1
-  t.stat <- t.numer / t.denom
-  t.pval <- 2 * (1 - pt(abs(t.stat), nx + ny - 2))
-  
-  res <- matrix(cbind(t.numer, t.denom, t.stat, t.pval), ncol = 4)
-  dimnames(res)[2] <- list(c("numeratorTStatistic", "denominatorTStatistic", "tStatistic", 
-          "pValueTStatistic"))
-  return(res)
-}
-
-#' computes the standard deviation corresponding to the variances output by rvar
-#' @param x matrix
-#' @export
-rsd <- function(x) sqrt(rvar(x))
-
-#' computes the mean standard deviation for two groups
-#' @param x1 matrix corresponding to the first of two groups
-#' @param x2 matrix corresponding to the second of two groups
-#' @export
-rsp <- function(x1, x2) sqrt((rvar(x1) + rvar(x2))/2)
-
-#' compute the variances for each row in a matrix (e.g. of expression values)
-#' @param x matrix
-#' @param n number of columns in the matrix; defaults to ncol(x)
-#' @export 
-rvar <- function(x, n = ncol(x)) c((x - rowMeans(x))^2 %*% rep(1,n)) / (n-1)
-
-#' computes the pooled standard deviation for two groups
-#' @param x1 matrix corresponding to the first of two groups
-#' @param x2 matrix corresponding to the second of two groups
-rssp <- function(x1, x2) rsp(x1, x2) * sqrt(1 / ncol(x1) + 1 / ncol(x2))
 
 #' Function that will replace all gene identifiers in a gene set with the p values associated to the gene identifiers
 #' @param geneSet list of gene sets; each gene set (component of the list) is a character vector of gene identifiers
@@ -199,7 +82,7 @@ rssp <- function(x1, x2) rsp(x1, x2) * sqrt(1 / ncol(x1) + 1 / ncol(x2))
 #' @return list of gene sets; each component of the list (gene set) is a numeric vector of p values; the names
 #'   of the numeric vector are the gene identifiers corresponding to the p values
 #' @export 
-mapGenesetStatistic <- function(geneSet, geneStatistic){
+mapGeneSetStatistic <- function(geneSet, geneStatistic){
 	myfun <- function(x){
 		rv <- geneStatistic[row.names(geneStatistic) %in% x, ]
 		return(rv)
@@ -212,7 +95,7 @@ mapGenesetStatistic <- function(geneSet, geneStatistic){
 #' Function to convert probeset datasets to gene datasets
 #' (deprecated) 
 #' TODO look for BioConductor based equivalent
-#' @param xp input table of gene-sets, probe.ids, and gene.ids, in that order.
+#' @param xp input table of gene sets, probe.ids, and gene.ids, in that order.
 #' @param yp input table of probe.ids and original and permuted probeset-statistics.
 #' @return TODO fill out 
 #' @export
@@ -226,7 +109,7 @@ pp2g <- function(xp, yp){
   yp  <- yp[, -1]
   dimnames(yp)[[1]] <- pid # need for filtering for y downstream.
   
-  y2xp <- mapGenesetStatistic(xp[,2], pid) # map p-values in yp to probesets in xp.
+  y2xp <- mapGeneSetStatistic(xp[,2], pid) # map p-values in yp to probesets in xp.
   p1   <- data.frame(Probe.ID = pid[y2xp], P0 = yp[y2xp, 2])
   
   # Create gene-statistic table; take min p-value for all probesets for a given gene.
@@ -243,7 +126,7 @@ pp2g <- function(xp, yp){
   y <- data.frame(Gene.ID = I(x30), yp[p30, ])
   
   # Create unique(GO.#, Gene.ID) combination table.
-  y2x3<- mapGenesetStatistic(x3,x30)
+  y2x3<- mapGeneSetStatistic(x3,x30)
   x41 <- x1*10^10 + y2x3 # (GO number inflated  + gene number)
   n41 <- length(x41)
   x40 <- sort(unique(x41)) # multiple probe-sets corr. to gene can cause duplication in x41.
@@ -260,36 +143,36 @@ pp2g <- function(xp, yp){
 
 
 #' Function to define the cutoffs to be used for each individual gene set statistic;
-#' @param observedGenesetStats dataframe as returned by mlpStatistic 
-#' @param permutationGenesetStats output of MLP except for the geneset size column; 
+#' @param observedGeneSetStats dataframe as returned by mlpStatistic 
+#' @param permutationGeneSetStats output of MLP except for the gene set size column; 
 #'   matrix of gene set statistics based on the permutation procedure
 #' @return vector of p values for each gene set
 #' @export
-getIndividualPValues <- function(observedGenesetStats, permutationGenesetStats){
+getIndividualPValues <- function(observedGeneSetStats, permutationGeneSetStats){
   # individual cut-offs
-  w1 <- matrix(rep(observedGenesetStats[, 2], ncol(permutationGenesetStats)), nrow = nrow(observedGenesetStats), ncol = ncol(permutationGenesetStats))
-  dw0w1 <-  ifelse(w1 - permutationGenesetStats > 0, 1, 0)
+  w1 <- matrix(rep(observedGeneSetStats[, 2], ncol(permutationGeneSetStats)), nrow = nrow(observedGeneSetStats), ncol = ncol(permutationGeneSetStats))
+  dw0w1 <-  ifelse(w1 - permutationGeneSetStats > 0, 1, 0)
   pw0 <- 1 - rowMeans(dw0w1) 
   return(pw0)
 }
 
 #' Function to define the smoothed monotonic cutoffs leveraging across gene sets of similar size;
 #' it calls quantileCurves and ctpval1 to create smoothed quantile curves and calculate the corresponding
-#' p values for the geneset.  
-#' @param observedGenesetStats dataframe as returned by mlpStatistic 
-#' @param permutationGenesetStats output of MLP except for the geneset size column; 
+#' p values for the gene set.  
+#' @param observedGeneSetStats dataframe as returned by mlpStatistic 
+#' @param permutationGeneSetStats output of MLP except for the geneset size column; 
 #'   matrix of gene set statistics based on the permutation procedure
 #' @param q.cutoff vector of quantiles at which p values for each gene set are desired (to be
 #'   specified by the users)
 #' @param df degrees of freedom used for the smoothing splines used to calculate the smoothed quantile curves; defaults to 9.  
 #' @return vector of p values for each gene set
 #' @export
-getSmoothedPValues <- function(observedGenesetStats, permutationGenesetStats, q.cutoff, df = 9){
+getSmoothedPValues <- function(observedGeneSetStats, permutationGeneSetStats, q.cutoff, df = 9){
   ### This imposes the decreasing criterion and has df =9
-  w1 <- cbind(rep(observedGenesetStats[,1], ncol(permutationGenesetStats[,])), as.vector(permutationGenesetStats[,]))
+  w1 <- cbind(rep(observedGeneSetStats[,1], ncol(permutationGeneSetStats[,])), as.vector(permutationGeneSetStats[,]))
   lqi = NULL; hqi= q.cutoff
   ### work <- ee1(x=sqrt(w1[,1]), y=w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = F, plot = T, flag = F, dg = 15, logtran = F)
-  work <- quantileCurves(x = sqrt(w1[, 1]), y = w1[, 2], x0 = sqrt(observedGenesetStats[,1]), y0 = observedGenesetStats[,2],
+  work <- quantileCurves(x = sqrt(w1[, 1]), y = w1[, 2], x0 = sqrt(observedGeneSetStats[,1]), y0 = observedGeneSetStats[,2],
       type = "dec", m = 20, lqi = lqi, hqi = hqi, sym = FALSE, plot = TRUE, flag = FALSE, 
       df = df, logtran = FALSE)
   pval <- ctpval1(work, q.cutoff = q.cutoff)
@@ -305,7 +188,7 @@ getSmoothedPValues <- function(observedGenesetStats, permutationGenesetStats, q.
 #' @param type constraints to the smoothed quantile curve, one of "none" (default), "dec" (decreasing) or 
 #'   "inc" (increasing)
 #' @param m block size for constructing the smoothed quantile curve (which defines the neighborhood
-#'   of the geneset); defaults to 20.
+#'   of the gene set); defaults to 20.
 #' @param lqi vector of the percentiles at which the lower quantile curve is desired
 #' @param hqi vector of the percentiles at which the upper quantile curve is desired
 #' @param sym logical; should the curves be symmetric (TRUE) or not (FALSE); one does not expect it to
@@ -493,7 +376,7 @@ csort <- function(x) {
 #' This function interpolates between the smoothed quantile curves to determine the p value for a given geneset
 #' @param x.ct output of quantileCurves, i.e. the curves of the contours for the different quantiles 
 #' @param q.cutoff critical values
-#' @return actual p values for each geneset
+#' @return actual p values for each gene set
 #' @export
 ctpval1 <- function(x.ct, q.cutoff) {
   p <- ncol(x.ct) 
@@ -515,7 +398,7 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #' of the gene p values or column permutations of the expression matrix; the p values
 #' can be obtained either as individual gene set p values or p values based on smoothing
 #' across gene sets of similar size.
-#' @param geneSet is the input list of gene-sets (components) and gene-IDs (character vectors). (GO category and Gene ID)
+#' @param geneSet is the input list of gene sets (components) and gene IDs (character vectors). (GO category and Gene ID)
 #' @param geneStatistic is either a named numeric vector (if rowPermutations is TRUE)
 #'   or a numeric matrix of pvalues (if rowPermutations is FALSE). The names of the numeric vector
 #'   or row names of the matrix should represent the gene IDs.
@@ -530,14 +413,14 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #'    or not (FALSE).
 #' @param criticalValues vector of quantiles at which p values for each gene set are desired
 #' @param df degrees of freedom for the smooth.spline function used in getSmoothedPValues 
-#' @return data frame with three columns: genesetSize, genesetStatistic and genesetPValue.
+#' @return data frame with three columns: geneSetSize, geneSetStatistic and geneSetPValue.
 #' @references TODO
 #' @export
 MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
     criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), df = 9){
   
   if (!is.list(geneSet)){
-    stop("The 'geneSet' should be a list of gene sets where for each gene set the gene IDs as a character vector")
+    stop("The 'geneSet' should be a named list of gene sets. The names are the gene set identifiers and the contents of each component (of the list) is a character vector of Entrez Gene identifiers")
   }
   
   if (is.vector(geneStatistic))
@@ -553,15 +436,15 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
     nPermutations <- ncol(geneStatistic) - 2
   }
   
-  genesetSize <- sapply(geneSet, function(x) length(x))
-  genesetIndices <- which(genesetSize >= minGenes & genesetSize <= maxGenes)
-  geneSet <- geneSet[genesetIndices]
+  geneSetSize <- sapply(geneSet, function(x) length(x))
+  geneSetIndices <- which(geneSetSize >= minGenes & geneSetSize <= maxGenes)
+  geneSet <- geneSet[geneSetIndices]
   
   ### Remove missing values from x and y.
   geneStatistic <- na.omit(geneStatistic)
   geneStatistic <- geneStatistic[grep("^[[:digit:]]+$", rownames(geneStatistic)),,drop=FALSE]
   
-  mapResult <- mapGenesetStatistic(geneSet, geneStatistic)
+  mapResult <- mapGeneSetStatistic(geneSet, geneStatistic)
   
   # geneSet <- geneSet[!is.na(y2x), ]
   pValueNAlist <- lapply(mapResult, function(x) which(!is.na(x)))
@@ -569,11 +452,8 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
 	  x[y]
   }
   reducedMapResult <- mapply(filterFunction, mapResult)
-  reducedGeneset <- mapply(filterFunction, geneSet)
+  reducedGeneSet <- mapply(filterFunction, geneSet)
   
-  # y2x <- mapGenesetStatistic(geneSet[, 2], geneStatistic[, 1])
-  
-  # n1 <- length(unique(geneSet[,1]))
   n2 <- nrow(geneStatistic)
   
   w0 <- t(mlpStatistic(reducedMapResult))
@@ -593,7 +473,7 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
 	row.names(y1) <- row.names(geneStatistic) 
     rm(p1)
 	
-	mapResultPermuted <- mapGenesetStatistic(reducedGeneset, y1)
+	mapResultPermuted <- mapGeneSetStatistic(reducedGeneSet, y1)
 	w <- t(mlpStatistic(mapResultPermuted))
   }
   
@@ -607,7 +487,7 @@ MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermuta
     pw0 <- getIndividualPValues(w0, w)
   }
   
-  res <- data.frame(genesetSize = w0[ ,1], genesetStatistic = w0[ ,2], genesetPValue = pw0)
+  res <- data.frame(geneSetSize = w0[ ,1], geneSetStatistic = w0[ ,2], geneSetPValue = pw0)
   class(res) <- c("MLP", class(res))
   return(res)
 }
