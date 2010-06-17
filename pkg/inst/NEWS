@@ -1,3 +1,11 @@
+0.0-4
+   o significant speedups for goAnnotation and addGeneSetDescription
+   o renamed summary.MLP to addGeneSetDescription
+   o add support for dogs
+   o documentation fixes
+   o remove (deprecated) goInputMLP
+   o remove dead code in goAnnotation
+   o remove pperm, tStatistic and their utility functions (limma being preferred)
 0.0-3
    o fix probeset names (exclude non-numeric ones)
 0.0-2
