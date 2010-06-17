@@ -94,7 +94,7 @@ y[1:10]
 out.MLP <- MLP(geneSet = go.eSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
     nPermutations = 6, smoothPValues = TRUE)
 
-tmp <- summary(object = out.MLP, goInFeatureNames = go.eSet)
+tmp <- addGeneSetDescription(object = out.MLP, geneSets = go.eSet)
 
 tmp[1:10,]
 #            genesetSize genesetStatistic genesetPValue
