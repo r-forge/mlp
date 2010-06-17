@@ -6,5 +6,5 @@
 (deprecated) 
 TODO look for BioConductor based equivalent}
 \value{TODO fill out}
-\arguments{\item{xp}{input table of gene-sets, probe.ids, and gene.ids, in that order.}
+\arguments{\item{xp}{input table of gene sets, probe.ids, and gene.ids, in that order.}
 \item{yp}{input table of probe.ids and original and permuted probeset-statistics.}}

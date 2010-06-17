@@ -14,7 +14,7 @@ and the x0 values in the last column}
 \item{type}{constraints to the smoothed quantile curve, one of "none" (default), "dec" (decreasing) or 
 "inc" (increasing)}
 \item{m}{block size for constructing the smoothed quantile curve (which defines the neighborhood
-of the geneset); defaults to 20.}
+of the gene set); defaults to 20.}
 \item{lqi}{vector of the percentiles at which the lower quantile curve is desired}
 \item{hqi}{vector of the percentiles at which the upper quantile curve is desired}
 \item{sym}{logical; should the curves be symmetric (TRUE) or not (FALSE); one does not expect it to

@@ -1,7 +1,7 @@
-\name{mapGenesetStatistic}
-\alias{mapGenesetStatistic}
+\name{mapGeneSetStatistic}
+\alias{mapGeneSetStatistic}
 \title{Function that will replace all gene identifiers in a gene set with the p values associated to the gene identifiers...}
-\usage{mapGenesetStatistic(geneSet, geneStatistic)}
+\usage{mapGeneSetStatistic(geneSet, geneStatistic)}
 \description{Function that will replace all gene identifiers in a gene set with the p values associated to the gene identifiers}
 \value{list of gene sets; each component of the list (gene set) is a numeric vector of p values; the names
 of the numeric vector are the gene identifiers corresponding to the p values}

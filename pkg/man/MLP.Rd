@@ -9,9 +9,9 @@
 of the gene p values or column permutations of the expression matrix; the p values
 can be obtained either as individual gene set p values or p values based on smoothing
 across gene sets of similar size.}
-\value{data frame with three columns: genesetSize, genesetStatistic and genesetPValue.}
+\value{data frame with three columns: geneSetSize, geneSetStatistic and geneSetPValue.}
 \references{TODO}
-\arguments{\item{geneSet}{is the input list of gene-sets (components) and gene-IDs (character vectors). (GO category and Gene ID)}
+\arguments{\item{geneSet}{is the input list of gene sets (components) and gene IDs (character vectors). (GO category and Gene ID)}
 \item{geneStatistic}{is either a named numeric vector (if rowPermutations is TRUE)
 or a numeric matrix of pvalues (if rowPermutations is FALSE). The names of the numeric vector
 or row names of the matrix should represent the gene IDs.}
