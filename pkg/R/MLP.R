@@ -418,7 +418,8 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #'    or not (FALSE).
 #' @param criticalValues vector of quantiles at which p values for each gene set are desired
 #' @param df degrees of freedom for the smooth.spline function used in getSmoothedPValues 
-#' @return data frame with three columns: geneSetSize, geneSetStatistic and geneSetPValue.
+#' @return data frame with four columns: totalGeneSetSize, testedGeneSetSize, geneSetStatistic and geneSetPValue;
+#' the rows of the data frame are ordered by ascending geneSetPValue
 #' @references Raghavan, Nandini et al. (2007). The high-level similarity of some disparate gene expression measures,
 #' Bioinformatics, 23, 22, 3032-3038.
 #' @export
@@ -443,10 +444,10 @@ MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100,
   if (!rowPermutations) {
     nPermutations <- ncol(geneStatistic) - 2
   }
-  #+++++++++++++++
+  
   totalGeneSetSize <- sapply(geneSet, length)
   geneSets <- sapply(geneSet, function(x) x[x %in% rownames(geneStatistic)])
-  #+++++++++++++++
+  
   geneSetSize <- sapply(geneSets, function(x) length(x))
   geneSetIndices <- which(geneSetSize >= minGenes & geneSetSize <= 
           maxGenes)

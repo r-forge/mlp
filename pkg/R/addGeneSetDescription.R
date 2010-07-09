@@ -10,7 +10,9 @@
 #' are of type character. The 'pathwaySource' argument should be the same as the argument
 #' provided to the getGeneSets function; defaults to NULL 
 #' @param ... further arguments; currently none are used
-#' @return TODO
+#' @return the data frame as returned by MLP enriched with an additional column geneSetDescription, providing
+#' a concise description of the gene set
+#' @seealso \link{MLP}
 #' @export
 addGeneSetDescription <- 
     function(object, 
@@ -29,20 +31,20 @@ addGeneSetDescription <-
     geneSetNames <- rownames(object)
     if (!all(geneSetNames %in% names(allGOTerms))) stop("Check the pathwaySource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
     returnValue <- data.frame(object, 
-        genesetDescription = unlist(allGOTerms[geneSetNames]))
+        geneSetDescription = unlist(allGOTerms[geneSetNames]))
   }
   if (any(pathwaySource %in% c("KEGG"))) {
     allKEGGterms <- as.list(KEGGPATHID2NAME)
     geneSetNames <- gsub("^[[:alpha:]]{3}", "", rownames(object))
     if (!all(geneSetNames %in% names(allKEGGterms))) stop("Check the pathwaySource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
     returnValue <- data.frame(object, 
-        genesetDescription = unlist(allKEGGterms[geneSetNames]))
+        geneSetDescription = unlist(allKEGGterms[geneSetNames]))
   }
   if (all(!(pathwaySource %in% c("GOBP", "GOMF", "GOCC", "KEGG")))) {
     if (!all(rownames(object) %in% pathwaySource$PATHWAYID)) stop("Check the pathwaySource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
     idx <- match(rownames(object), pathwaySource$PATHWAYID)
     returnValue <- data.frame(object, 
-        genesetDescription = pathwaySource$PATHWAYNAME[idx])
+        geneSetDescription = pathwaySource$PATHWAYNAME[idx])
   }
   attr(returnValue, "species") <- species
   class(returnValue) <- c("MLP", class(returnValue))

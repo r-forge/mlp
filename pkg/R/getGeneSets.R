@@ -27,9 +27,7 @@ getGeneSets <-
   if (!is.data.frame(pathwaySource) & !(pathwaySource %in% 
         c("GOBP", "GOMF", "GOCC", "KEGG"))) 
     stop("The 'pathwaySource' argument should be one of 'GOBP', 'GOMF', 'GOCC', 'KEGG' or a data.frame.  More info, see help.")
-# if (is.data.frame(pathwaySource) & !(c("PATHWAYID", "TAXID", 
-#           "PATHWAYNAME", "GENEID") %in% colnames(pathwaySource))) 
-  # because otherwise there is a warning which is not needed
+  
   if (is.data.frame(pathwaySource)) if (!(c("PATHWAYID", "TAXID", 
               "PATHWAYNAME", "GENEID") %in% colnames(pathwaySource))) 
       stop("The pathwaySource as data.frame should have at least the 4 columns 'PATHWAYID', 'TAXID', 'PATHWAYNAME' and 'GENEID'. More info on their content, see help.")

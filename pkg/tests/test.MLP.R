@@ -53,22 +53,9 @@ normDat.p <- fit2$p.value
 normDat.p[1:5]
 #[1] 0.4328583 0.7448996 0.6088859 0.1845008 0.2312761
 
-##=================================================INPUTS FOR MLP==========================================
-
 system.time(goGeneSet <- getGeneSets(species = "Mouse", pathwaySource = "GOBP", eset = expressionSetGcrma))
 goGeneSet[1:3]
-# $`GO:0000002`
-# [1] "18975"  "19819"  "27393"  "27395"  "27397"  "57813"  "83945"  "226153"
-# [9] "382985"
-# 
-# $`GO:0000018`
-#  [1] "12053"  "12144"  "12487"  "13990"  "15978"  "16183"  "16189"  "17350" 
-#  [9] "17685"  "17688"  "19264"  "20371"  "20852"  "21803"  "21939"  "22210" 
-# [17] "50931"  "57765"  "58186"  "65113"  "104271"
-# 
-# $`GO:0000038`
-# [1] "15488"  "19305"  "26458"  "26569"  "54326"  "94180"  "171281" "217698"
-
+# output changes with annotation version !
 
 y <- normDat.p[,1]
 names(y) <- featureNames(expressionSetGcrma)
@@ -79,36 +66,15 @@ y[1:10]
 # 100038570 100038635 
 # 0.1368744 0.3272610 
 
-outMLP <- MLP(geneSet = goGeneSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
+mlpObject <- MLP(geneSet = goGeneSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
     nPermutations = 6, smoothPValues = TRUE)
 
-tmp <- addGeneSetDescription(object = outMLP, pathwaySource = "GOBP",
+mlpObjectWithDesc <- addGeneSetDescription(object = mlpObject, pathwaySource = "GOBP",
     eset = expressionSetGcrma)
 
-tmp[1:10,]
-#            geneSetSize geneSetStatistic geneSetPValue
-# GO:0007565          47        0.8484050  8.438006e-05
-# GO:0006400          10        1.2423499  2.534188e-04
-# GO:0015718          17        1.0826887  3.335550e-04
-# GO:0007566          17        1.0291455  7.618846e-04
-# GO:0002495          15        1.0367976  1.023345e-03
-# GO:0019886          15        1.0367976  1.023345e-03
-# GO:0002504          17        0.9905982  1.340495e-03
-# GO:0035088          12        1.0522212  1.511658e-03
-# GO:0019882          43        0.7476719  2.152273e-03
-# GO:0002478          22        0.8934001  2.468006e-03
-#                                                                                   geneSetDescription
-# GO:0007565                                                                          female pregnancy
-# GO:0006400                                                                         tRNA modification
-# GO:0015718                                                             monocarboxylic acid transport
-# GO:0007566                                                                       embryo implantation
-# GO:0002495                   antigen processing and presentation of peptide antigen via MHC class II
-# GO:0019886         antigen processing and presentation of exogenous peptide antigen via MHC class II
-# GO:0002504 antigen processing and presentation of peptide or polysaccharide antigen via MHC class II
-# GO:0035088                                establishment or maintenance of apical/basal cell polarity
-# GO:0019882                                                       antigen processing and presentation
-# GO:0002478                          antigen processing and presentation of exogenous peptide antigen
+mlpObjectWithDesc[1:10,]
+# output changes with annotation version !
 
+plotGOgraph(object = mlpObject, ontology = "BP", annotation = "mouse4302mmentrezg")
 
-plotGOgraph(object = outMLP, ontology = "BP", annotation = "mouse4302mmentrezg")
-
+mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10)
