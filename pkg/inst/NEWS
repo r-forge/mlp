@@ -1,3 +1,8 @@
+0.0-6
+   o fix to addGeneSetDescription
+0.0-5
+   o goAnnotation replaced by the more general getGeneSets (for other pathway sources than the GO data base)
+   o added mlpBarplot
 0.0-4
    o significant speedups for goAnnotation and addGeneSetDescription
    o renamed summary.MLP to addGeneSetDescription

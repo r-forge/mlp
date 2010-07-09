@@ -10,8 +10,12 @@ of the gene p values or column permutations of the expression matrix; the p valu
 can be obtained either as individual gene set p values or p values based on smoothing
 across gene sets of similar size.}
 \value{data frame with three columns: geneSetSize, geneSetStatistic and geneSetPValue.}
-\references{TODO}
-\arguments{\item{geneSet}{is the input list of gene sets (components) and gene IDs (character vectors). (GO category and Gene ID)}
+\references{Raghavan, Nandini et al. (2007). The high-level similarity of some disparate gene expression measures,
+Bioinformatics, 23, 22, 3032-3038.}
+\arguments{\item{geneSet}{is the input list of gene sets (components) and gene IDs (character vectors). 
+A gene set can, for example, be a GO category with for each category Entrez gene identifiers; 
+The \link{getGeneSets} function can be used to construct the geneSet argument for different
+pathway sources.}
 \item{geneStatistic}{is either a named numeric vector (if rowPermutations is TRUE)
 or a numeric matrix of pvalues (if rowPermutations is FALSE). The names of the numeric vector
 or row names of the matrix should represent the gene IDs.}

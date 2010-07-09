@@ -55,32 +55,20 @@ normDat.p[1:5]
 
 ##=================================================INPUTS FOR MLP==========================================
 
-go.eSet <- goAnnotation(organism="Mouse", ontology="BP", featureNames = featureNames(expressionSetGcrma),
-    minGenes = 5, maxGenes = 100)
-go.eSet[1:3]
-#$`GO:0000002`
-#[1] "18975"  "27393"  "27395"  "27397"  "83945"  "382985"
-#
-#$`GO:0000018`
-# [1] "12053"  "12144"  "12487"  "13990"  "15978"  "16183"  "16189"  "17350"  "17685"  "17688" 
-#[11] "19264"  "20371"  "20852"  "21803"  "21939"  "50931"  "57765"  "65113"  "104271"
-#
-#$`GO:0000038`
-#[1] "15488"  "19305"  "54326"  "94180"  "171281" "217698"
+system.time(goGeneSet <- getGeneSets(species = "Mouse", pathwaySource = "GOBP", eset = expressionSetGcrma))
+goGeneSet[1:3]
+# $`GO:0000002`
+# [1] "18975"  "19819"  "27393"  "27395"  "27397"  "57813"  "83945"  "226153"
+# [9] "382985"
+# 
+# $`GO:0000018`
+#  [1] "12053"  "12144"  "12487"  "13990"  "15978"  "16183"  "16189"  "17350" 
+#  [9] "17685"  "17688"  "19264"  "20371"  "20852"  "21803"  "21939"  "22210" 
+# [17] "50931"  "57765"  "58186"  "65113"  "104271"
+# 
+# $`GO:0000038`
+# [1] "15488"  "19305"  "26458"  "26569"  "54326"  "94180"  "171281" "217698"
 
-# x <- goInputMLP(go.eSet) ###First Input for MLP (both columns are numeric).
-# x[1:10,]
-#   GO Gene.ID
-#1   2   18975
-#2   2   27393
-#3   2   27395
-#4   2   27397
-#5   2   83945
-#6   2  382985
-#7  18   12053
-#8  18   12144
-#9  18   12487
-#10 18   13990
 
 y <- normDat.p[,1]
 names(y) <- featureNames(expressionSetGcrma)
@@ -91,32 +79,36 @@ y[1:10]
 # 100038570 100038635 
 # 0.1368744 0.3272610 
 
-out.MLP <- MLP(geneSet = go.eSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
+outMLP <- MLP(geneSet = goGeneSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
     nPermutations = 6, smoothPValues = TRUE)
 
-tmp <- addGeneSetDescription(object = out.MLP, geneSets = go.eSet)
+tmp <- addGeneSetDescription(object = outMLP, pathwaySource = "GOBP",
+    eset = expressionSetGcrma)
 
 tmp[1:10,]
-#            genesetSize genesetStatistic genesetPValue
-# GO:0000002          47        0.8484050  1.812210e-08
-# GO:0000018          17        1.0826887  2.794698e-06
-# GO:0000038          10        1.2423499  1.654631e-05
-# GO:0000041          17        1.0291455  1.685600e-05
-# GO:0000045          15        1.0367976  4.477027e-05
-# GO:0000050          15        1.0367976  4.477027e-05
-# GO:0000052          17        0.9905982  5.507421e-05
-# GO:0000060          43        0.7476719  6.437538e-05
-# GO:0000070          25        0.8604682  1.135816e-04
-# GO:0000075          25        0.8570210  1.288780e-04
-#                                                                                          genesetName
-# GO:0000002                                                                          female pregnancy
-# GO:0000018                                                             monocarboxylic acid transport
-# GO:0000038                                                                         tRNA modification
-# GO:0000041                                                                       embryo implantation
-# GO:0000045                   antigen processing and presentation of peptide antigen via MHC class II
-# GO:0000050         antigen processing and presentation of exogenous peptide antigen via MHC class II
-# GO:0000052 antigen processing and presentation of peptide or polysaccharide antigen via MHC class II
-# GO:0000060                                                       antigen processing and presentation
-# GO:0000070                                             establishment or maintenance of cell polarity
-# GO:0000075                                                                      vacuole organization
+#            geneSetSize geneSetStatistic geneSetPValue
+# GO:0007565          47        0.8484050  8.438006e-05
+# GO:0006400          10        1.2423499  2.534188e-04
+# GO:0015718          17        1.0826887  3.335550e-04
+# GO:0007566          17        1.0291455  7.618846e-04
+# GO:0002495          15        1.0367976  1.023345e-03
+# GO:0019886          15        1.0367976  1.023345e-03
+# GO:0002504          17        0.9905982  1.340495e-03
+# GO:0035088          12        1.0522212  1.511658e-03
+# GO:0019882          43        0.7476719  2.152273e-03
+# GO:0002478          22        0.8934001  2.468006e-03
+#                                                                                   geneSetDescription
+# GO:0007565                                                                          female pregnancy
+# GO:0006400                                                                         tRNA modification
+# GO:0015718                                                             monocarboxylic acid transport
+# GO:0007566                                                                       embryo implantation
+# GO:0002495                   antigen processing and presentation of peptide antigen via MHC class II
+# GO:0019886         antigen processing and presentation of exogenous peptide antigen via MHC class II
+# GO:0002504 antigen processing and presentation of peptide or polysaccharide antigen via MHC class II
+# GO:0035088                                establishment or maintenance of apical/basal cell polarity
+# GO:0019882                                                       antigen processing and presentation
+# GO:0002478                          antigen processing and presentation of exogenous peptide antigen
+
+
+plotGOgraph(object = outMLP, ontology = "BP", annotation = "mouse4302mmentrezg")
 

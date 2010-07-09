@@ -169,9 +169,11 @@ getIndividualPValues <- function(observedGeneSetStats, permutationGeneSetStats){
 #' @export
 getSmoothedPValues <- function(observedGeneSetStats, permutationGeneSetStats, q.cutoff, df = 9){
   ### This imposes the decreasing criterion and has df =9
-  w1 <- cbind(rep(observedGeneSetStats[,1], ncol(permutationGeneSetStats[,])), as.vector(permutationGeneSetStats[,]))
-  lqi = NULL; hqi= q.cutoff
-  ### work <- ee1(x=sqrt(w1[,1]), y=w1[,2], x0 = sqrt(w0[,1]), y0 = w0[,2],type=c("dec", "inc", "none")[1], m = 20, lqi = lqi, hqi=hqi, sym = F, plot = T, flag = F, dg = 15, logtran = F)
+  w1 <- cbind(rep(observedGeneSetStats[,1], ncol(permutationGeneSetStats[,])), 
+              as.vector(permutationGeneSetStats[,]))
+  lqi <- NULL
+  hqi <- q.cutoff
+
   work <- quantileCurves(x = sqrt(w1[, 1]), y = w1[, 2], x0 = sqrt(observedGeneSetStats[,1]), y0 = observedGeneSetStats[,2],
       type = "dec", m = 20, lqi = lqi, hqi = hqi, sym = FALSE, plot = TRUE, flag = FALSE, 
       df = df, logtran = FALSE)
@@ -398,7 +400,10 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #' of the gene p values or column permutations of the expression matrix; the p values
 #' can be obtained either as individual gene set p values or p values based on smoothing
 #' across gene sets of similar size.
-#' @param geneSet is the input list of gene sets (components) and gene IDs (character vectors). (GO category and Gene ID)
+#' @param geneSet is the input list of gene sets (components) and gene IDs (character vectors). 
+#' A gene set can, for example, be a GO category with for each category Entrez gene identifiers; 
+#' The \link{getGeneSets} function can be used to construct the geneSet argument for different
+#' pathway sources.
 #' @param geneStatistic is either a named numeric vector (if rowPermutations is TRUE)
 #'   or a numeric matrix of pvalues (if rowPermutations is FALSE). The names of the numeric vector
 #'   or row names of the matrix should represent the gene IDs.
@@ -414,80 +419,80 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #' @param criticalValues vector of quantiles at which p values for each gene set are desired
 #' @param df degrees of freedom for the smooth.spline function used in getSmoothedPValues 
 #' @return data frame with three columns: geneSetSize, geneSetStatistic and geneSetPValue.
-#' @references TODO
+#' @references Raghavan, Nandini et al. (2007). The high-level similarity of some disparate gene expression measures,
+#' Bioinformatics, 23, 22, 3032-3038.
 #' @export
-MLP <- function(geneSet, geneStatistic, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
-    criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), df = 9){
-  
-  if (!is.list(geneSet)){
+MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100, 
+        rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
+        criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
+        df = 9) 
+{
+  if (!is.list(geneSet)) {
     stop("The 'geneSet' should be a named list of gene sets. The names are the gene set identifiers and the contents of each component (of the list) is a character vector of Entrez Gene identifiers")
   }
-  
-  if (is.vector(geneStatistic))
-	  if (!rowPermutations)
-		  stop("If rowPermutations is set to FALSE, the 'geneStatistic' needs to be a matrix")
-	  geneStatistic <- as.matrix(geneStatistic)
-  
-  if (!is.numeric(geneStatistic) & !is.matrix(geneStatistic)){
+  species <- NULL
+  if (inherits(geneSet, "geneSetMLP")) 
+    species <- attr(geneSet, "species")
+  if (is.vector(geneStatistic)) 
+    if (!rowPermutations) 
+      stop("If rowPermutations is set to FALSE, the 'geneStatistic' needs to be a matrix")
+  geneStatistic <- as.matrix(geneStatistic)
+  if (!is.numeric(geneStatistic) & !is.matrix(geneStatistic)) {
     warning("Argument 'geneStatistic' should be a numeric vector or matrix")
   }
-  
-  if (!rowPermutations){
+  if (!rowPermutations) {
     nPermutations <- ncol(geneStatistic) - 2
   }
-  
-  geneSetSize <- sapply(geneSet, function(x) length(x))
-  geneSetIndices <- which(geneSetSize >= minGenes & geneSetSize <= maxGenes)
-  geneSet <- geneSet[geneSetIndices]
-  
-  ### Remove missing values from x and y.
+  #+++++++++++++++
+  totalGeneSetSize <- sapply(geneSet, length)
+  geneSets <- sapply(geneSet, function(x) x[x %in% rownames(geneStatistic)])
+  #+++++++++++++++
+  geneSetSize <- sapply(geneSets, function(x) length(x))
+  geneSetIndices <- which(geneSetSize >= minGenes & geneSetSize <= 
+          maxGenes)
+  geneSets <- geneSets[geneSetIndices]
   geneStatistic <- na.omit(geneStatistic)
-  geneStatistic <- geneStatistic[grep("^[[:digit:]]+$", rownames(geneStatistic)),,drop=FALSE]
-  
-  mapResult <- mapGeneSetStatistic(geneSet, geneStatistic)
-  
-  # geneSet <- geneSet[!is.na(y2x), ]
+  geneStatistic <- geneStatistic[grep("^[[:digit:]]+$", rownames(geneStatistic)), 
+      , drop = FALSE]
+  mapResult <- mapGeneSetStatistic(geneSets, geneStatistic)
   pValueNAlist <- lapply(mapResult, function(x) which(!is.na(x)))
-  filterFunction <- function(x, y){
-	  x[y]
+  filterFunction <- function(x, y) {
+    x[y]
   }
   reducedMapResult <- mapply(filterFunction, mapResult)
-  reducedGeneSet <- mapply(filterFunction, geneSet)
-  
+  reducedGeneSet <- mapply(filterFunction, geneSets)
   n2 <- nrow(geneStatistic)
-  
   w0 <- t(mlpStatistic(reducedMapResult))
-  
-  # Only relevant rows of x to reduce downstream computations.
-
-  n11 <- length(geneSet)
-  
-  ### Create simulation data:
-  if (!rowPermutations){
-    ## Column Permutations
+  n11 <- length(geneSets)
+  if (!rowPermutations) {
     w <- mlpStatistic(reducedMapResult)
-  } else {
-    ## Row Permutations
-    p1 <- apply(matrix(1:n2, n2, nPermutations), 2, sample) # need "matrix" to resample each column separately. 
-    y1 <- matrix(geneStatistic[p1, 1], n2, nPermutations)
-	row.names(y1) <- row.names(geneStatistic) 
-    rm(p1)
-	
-	mapResultPermuted <- mapGeneSetStatistic(reducedGeneSet, y1)
-	w <- t(mlpStatistic(mapResultPermuted))
   }
-  
-  ### Determine Cut-offs:
-  if (smoothPValues){
-    if (!rowPermutations){
+  else {
+    p1 <- apply(matrix(1:n2, n2, nPermutations), 2, sample)
+    y1 <- matrix(geneStatistic[p1, 1], n2, nPermutations)
+    row.names(y1) <- row.names(geneStatistic)
+    rm(p1)
+    mapResultPermuted <- mapGeneSetStatistic(reducedGeneSet, 
+        y1)
+    w <- t(mlpStatistic(mapResultPermuted))
+  }
+  if (smoothPValues) {
+    if (!rowPermutations) {
       warning("Cannot smooth p-values if ind.sim = FALSE")
     }
-    pw0 <- getSmoothedPValues(w0, w[,-1], q.cutoff = criticalValues, df = df)
-  } else {
+    pw0 <- getSmoothedPValues(w0, w[, -1], q.cutoff = criticalValues, 
+        df = df)
+  }
+  else {
     pw0 <- getIndividualPValues(w0, w)
   }
-  
-  res <- data.frame(geneSetSize = w0[ ,1], geneSetStatistic = w0[ ,2], geneSetPValue = pw0)
+  res <- data.frame(testedGeneSetSize = w0[, 1], geneSetStatistic = w0[, 
+          2], geneSetPValue = pw0)
+  res <- res[order(res$geneSetPValue),]
+  res <- data.frame(totalGeneSetSize = totalGeneSetSize[rownames(res)], res)
+  if (!is.null(species)) 
+    attr(res, "species") <- species
   class(res) <- c("MLP", class(res))
   return(res)
 }
+
