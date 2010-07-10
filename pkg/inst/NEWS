@@ -1,5 +1,8 @@
 0.0-6
+   o store pathwaySource information in MLP output object
    o integrate addGeneSetDescription into MLP function and adapt mlpBarplot accordingly
+   o remove plot argument from quantileCurves (argument was not used)
+   o introduce plot method with support for type = "barplot" and type = "quantileCurves"
 0.0-5
    o goAnnotation replaced by the more general getGeneSets (for other pathway sources than the GO data base)
    o added mlpBarplot

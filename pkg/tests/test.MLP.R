@@ -76,7 +76,7 @@ mlpObject[1:10, ]
 plotGOgraph(object = mlpObject, ontology = "BP", annotation = "mouse4302mmentrezg")
 
 pdf(file = "test10.pdf", width = 10, height = 10)
-mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10)
+plot(mlpObject, nRow = 10) # by default:  type = "barplot"
 dev.off()
 
 unlink("test10.pdf")
@@ -94,3 +94,5 @@ if (FALSE){
   
   unlink("test100.pdf")
 }
+
+plot(mlpObject, type = "quantileCurves")

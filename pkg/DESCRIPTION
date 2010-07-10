@@ -13,4 +13,5 @@ Suggests: GO.db, org.Hs.eg.db, org.Mm.eg.db, org.Rn.eg.db,
     gplots, gmodels, gdata, gtools, GOstats
 License: GPL-3
 Collate: 'addGeneSetDescription.R' 'getGeneSets.R' 'mlpBarplot.R'
-    'MLP.R' 'plotGOgraph.R'
+    'MLP.R' 'plotGOgraph.R' 'plot.MLP.R' 'plotQuantileCurves.R'
+    'utils.R'
