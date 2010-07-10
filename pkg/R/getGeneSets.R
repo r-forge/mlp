@@ -96,6 +96,7 @@ getGeneSets <-
   # wrong way
   #geneSets <- sapply(geneSets, function(x) x[x %in% entrezIds])
   attr(geneSets, "species") <- species
+  attr(geneSets, "pathwaySource") <- pathwaySource
   class(geneSets) <- c("geneSetMLP", class(geneSets))
   return(geneSets)
 }

@@ -9,7 +9,7 @@
 plotGOgraph <- function(object, ontology, annotation, nRow = 5, mainTitle = "GO graph"){
   
   if (!inherits(object, "MLP"))
-    stop("The 'object' argument should be an object of class 'MLP'")
+    stop("The 'object' argument should be an object of class 'MLP' as produced by the MLP function")
   
   require(GO.db)
   require(paste(annotation, ".db", sep = ""), character.only = TRUE)

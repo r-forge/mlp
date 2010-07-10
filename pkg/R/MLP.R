@@ -293,8 +293,8 @@ quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"),
     x0 <-  exp(x0)
     y0 <-  exp(y0)
   }
-  plot(x0, y0, xlab="n", ylab="MLP", axes=FALSE, col="#08306B", pch=".")
-  axis(2, lwd = 1.5, col="#08306B")
+  plot(x0, y0, xlab = "n", ylab = "MLP", axes = FALSE, col = "#08306B", pch = ".")
+  axis(2, lwd = 1.5, col = "#08306B")
   atPositions <- axis(1, labels = FALSE)
   axis(1, lwd = 1.5, at = atPositions, labels = atPositions^2, las = 1, col = "#08306B")
   par(cex = 0.5)
@@ -418,22 +418,24 @@ ctpval1 <- function(x.ct, q.cutoff) {
 #'    or not (FALSE).
 #' @param criticalValues vector of quantiles at which p values for each gene set are desired
 #' @param df degrees of freedom for the smooth.spline function used in getSmoothedPValues 
-#' @return data frame with four columns: totalGeneSetSize, testedGeneSetSize, geneSetStatistic and geneSetPValue;
-#' the rows of the data frame are ordered by ascending geneSetPValue
+#' @param addGeneSetDescription logical indicating whether a column with the gene set description be added to
+#' the output data frame; defaults to TRUE.
+#' @return data frame with four (or five) columns: totalGeneSetSize, testedGeneSetSize, geneSetStatistic and geneSetPValue
+#' and (if addDescription is set to TRUE) geneSetDescription; the rows of the data frame are ordered by 
+#' ascending geneSetPValue.
+#'
 #' @references Raghavan, Nandini et al. (2007). The high-level similarity of some disparate gene expression measures,
 #' Bioinformatics, 23, 22, 3032-3038.
 #' @export
 MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100, 
         rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
         criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
-        df = 9) 
+        df = 9, addGeneSetDescription = TRUE) 
 {
-  if (!is.list(geneSet)) {
-    stop("The 'geneSet' should be a named list of gene sets. The names are the gene set identifiers and the contents of each component (of the list) is a character vector of Entrez Gene identifiers")
+  if (!inherits(geneSet, "geneSetMLP")) {
+    stop("The 'geneSet' should be an object of class 'geneSetMLP' as produced by getGeneSets")
   }
-  species <- NULL
-  if (inherits(geneSet, "geneSetMLP")) 
-    species <- attr(geneSet, "species")
+  species <- attr(geneSet, "species")
   if (is.vector(geneStatistic)) 
     if (!rowPermutations) 
       stop("If rowPermutations is set to FALSE, the 'geneStatistic' needs to be a matrix")
@@ -487,13 +489,18 @@ MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100,
   else {
     pw0 <- getIndividualPValues(w0, w)
   }
+  
   res <- data.frame(testedGeneSetSize = w0[, 1], geneSetStatistic = w0[, 
           2], geneSetPValue = pw0)
-  res <- res[order(res$geneSetPValue),]
+  res <- res[order(res$geneSetPValue), ]
   res <- data.frame(totalGeneSetSize = totalGeneSetSize[rownames(res)], res)
-  if (!is.null(species)) 
-    attr(res, "species") <- species
   class(res) <- c("MLP", class(res))
+  if (addGeneSetDescription){
+    pathwaySource <- attr(geneSet, "pathwaySource")
+    res <- addGeneSetDescription(object = res, pathwaySource = pathwaySource)
+  }
+  if (is.null(attr(res, "species"))) 
+    attr(res, "species") <- species
   return(res)
 }
 

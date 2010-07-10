@@ -1,4 +1,3 @@
-
 require(MLP)	
 set.seed(479)
 
@@ -69,12 +68,29 @@ y[1:10]
 mlpObject <- MLP(geneSet = goGeneSet, geneStatistic = y, minGenes = 5, maxGenes = 100, rowPermutations = TRUE, 
     nPermutations = 6, smoothPValues = TRUE)
 
-mlpObjectWithDesc <- addGeneSetDescription(object = mlpObject, pathwaySource = "GOBP",
-    eset = expressionSetGcrma)
 
-mlpObjectWithDesc[1:10,]
+
+mlpObject[1:10, ]
 # output changes with annotation version !
 
 plotGOgraph(object = mlpObject, ontology = "BP", annotation = "mouse4302mmentrezg")
 
+pdf(file = "test10.pdf", width = 10, height = 10)
 mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10)
+dev.off()
+
+unlink("test10.pdf")
+
+if (FALSE){
+  pdf(file = "test5.pdf", width =10, height = 10)
+  mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10, descriptionLength = 5)
+  dev.off()
+  
+  unlink("test5.pdf")
+  
+  pdf(file = "test100.pdf", width =10, height = 20)
+  mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10, descriptionLength = 100)
+  dev.off()
+  
+  unlink("test100.pdf")
+}

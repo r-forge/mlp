@@ -4,12 +4,14 @@
 \usage{MLP(geneSet, geneStatistic, minGenes=5, maxGenes=100,
     rowPermutations=TRUE, nPermutations=100, smoothPValues=TRUE,
     criticalValues=c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999),
-    df=9)}
+    df=9, addGeneSetDescription=TRUE)}
 \description{This function calculates p-values for each gene set based on row permutations
 of the gene p values or column permutations of the expression matrix; the p values
 can be obtained either as individual gene set p values or p values based on smoothing
 across gene sets of similar size.}
-\value{data frame with three columns: geneSetSize, geneSetStatistic and geneSetPValue.}
+\value{data frame with four (or five) columns: totalGeneSetSize, testedGeneSetSize, geneSetStatistic and geneSetPValue
+and (if addDescription is set to TRUE) geneSetDescription; the rows of the data frame are ordered by 
+ascending geneSetPValue.}
 \references{Raghavan, Nandini et al. (2007). The high-level similarity of some disparate gene expression measures,
 Bioinformatics, 23, 22, 3032-3038.}
 \arguments{\item{geneSet}{is the input list of gene sets (components) and gene IDs (character vectors). 
@@ -29,4 +31,6 @@ permutations (FALSE)}
 \item{smoothPValues}{logical indicating whether one wants to calculate smoothed cut-off thresholds (TRUE; default)
 or not (FALSE).}
 \item{criticalValues}{vector of quantiles at which p values for each gene set are desired}
-\item{df}{degrees of freedom for the smooth.spline function used in getSmoothedPValues}}
+\item{df}{degrees of freedom for the smooth.spline function used in getSmoothedPValues}
+\item{addGeneSetDescription}{logical indicating whether a column with the gene set description be added to
+the output data frame; defaults to TRUE.}}

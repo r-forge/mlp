@@ -1,5 +1,5 @@
 0.0-6
-   o fix to addGeneSetDescription
+   o integrate addGeneSetDescription into MLP function and adapt mlpBarplot accordingly
 0.0-5
    o goAnnotation replaced by the more general getGeneSets (for other pathway sources than the GO data base)
    o added mlpBarplot
