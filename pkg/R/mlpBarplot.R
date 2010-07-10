@@ -6,6 +6,7 @@
 #' for non-public data sources, the user can pass the pathway data as a dataframe with (at least) 
 #' the following four columns: PATHWAYID, TAXID, PATHWAYNAME and GENEID. It is assumed all columns
 #' are of type character. 
+#' @param nRow number of rows of the MLP data frame to depict in the barplot; defaults to 20.
 #' @param main main title; if NULL (default) "Effect of the treatment on <pathwaySource> gene sets"
 #' will be used
 #' @return the midpoints of all the bars are returned invisibly (using the conventions of barplot); 
