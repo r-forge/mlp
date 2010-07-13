@@ -1,3 +1,6 @@
+0.0-7
+   o add type = "GOgraph" to the plot method for MLP objects
+   o rudimentary draft for vignette included
 0.0-6
    o store pathwaySource information in MLP output object
    o integrate addGeneSetDescription into MLP function and adapt mlpBarplot accordingly

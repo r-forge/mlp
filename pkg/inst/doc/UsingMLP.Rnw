@@ -1,0 +1,121 @@
+\documentclass[a4paper]{article}
+\usepackage[OT1]{fontenc}
+\usepackage{Sweave}
+\begin{document}
+
+% \VignetteIndexEntry{UsingMLP}
+
+\title{Using MLP}
+\author{Nandini Raghavan, An De Bondt, Tobias Verbeke}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+First draft of MLP vignette document
+
+\section{Example Use}
+
+\subsection{Preliminaries}
+
+<<loadData>>=
+  require(MLP)
+  require(limma)
+  pathExampleData <- system.file("exampleFiles", "expressionSetGcrma.rda", package = "MLP")
+  load(pathExampleData)
+@  
+
+\subsection{Prepare P Values}
+
+<<preparePValues>>=
+  ### calculation of the statistics value
+  # via limma
+  group <- as.numeric(factor(pData(expressionSetGcrma)$subGroup1, levels = c("WT", "KO")))-1
+  design <- model.matrix(~group)
+  fit <- lmFit(exprs(expressionSetGcrma), design)
+  fit2 <- eBayes(fit)
+  results <- limma:::topTable(fit2, coef = "group", adjust.method = "fdr", number = Inf)
+  pvalues <- results[,"P.Value"]
+  names(pvalues) <- results$ID
+  # since we moved towards using "_at", next step should be needed as well
+  names(pvalues) <- sub("_at", "", names(pvalues))	
+@
+
+\subsection{Prepare Gene Sets}
+
+<<createGeneSets>>=
+  geneSets <- getGeneSets(species = "Mouse", 
+		pathwaySource = "GOCC", 
+		eset = expressionSetGcrma
+)	
+@
+
+
+\subsection{Run MLP}
+
+<<runMLP>>=
+  mlpOut <- MLP(
+		geneSet = geneSets, 
+		geneStatistic = pvalues, 
+		minGenes = 5, 
+		maxGenes = 100, 
+		rowPermutations = TRUE, 
+		nPermutations = 50, 
+		smoothPValues = TRUE, 
+		criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
+		df = 9) 	
+@
+
+\subsection{Visualize MLP Results}
+
+Three different types of plots are made available. The type of
+the plot is indicated with the \texttt{type} argument which
+can be one of 
+\begin{verbatim}
+   plot(., type = "quantileCurves")
+   plot(., type = "barplot")
+   plot(., type = "GOgraph")
+\end{verbatim}
+
+
+<<quantileCurves>>=
+  pdf("mlpQuantileCurves.pdf", width = 10, height = 10)
+  plot(mlpOut, type = "quantileCurves")
+  dev.off()
+@
+
+\begin{figure}[h!]
+\includegraphics{mlpQuantileCurves}
+\caption{Example of the quantile curves for the MLP run}
+\end{figure}
+
+
+<<barplot>>=
+  pdf("mlpBarplot.pdf", width = 10, height = 10)
+  op <- par(mar = c(30, 10, 6, 2))
+  plot(mlpOut, type = "barplot")
+  par(op)
+  dev.off()
+@
+
+\begin{figure}[h!]
+\includegraphics{mlpBarplot}
+\caption{Example of a barplot for MLP results}
+\end{figure}
+
+<<GOgraph>>=
+  pdf("mlpGOgraph.pdf", width = 20, height = 6)
+  op <- par(mar = c(2, 1, 0, 2))
+  plot(mlpOut, type = "GOgraph", nRow = 30, mainTitle = "GO graph")
+  par(op)
+  dev.off()
+@
+
+\begin{figure}[h!]
+\includegraphics{mlpGOgraph}
+\caption{Example of a GOgraph for MLP results}
+\end{figure}
+
+\end{document}

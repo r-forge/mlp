@@ -12,7 +12,7 @@ plot.MLP <- function(x, y = NULL, type = c("barplot", "GOgraph", "quantileCurves
       barplot = {
         mlpBarplot(object = x, ...)
       }, GOgraph = {
-        cat("Not yet implemented\n")
+        plotGOgraph(object = x, ...)
       }, quantileCurves = {
         if (is.null(attr(x, "quantileCurveInformation"))){
           stop("A quantile curve plot can only be drawn for an MLP run for which smoothPValues = TRUE")

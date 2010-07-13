@@ -73,7 +73,7 @@ mlpObject <- MLP(geneSet = goGeneSet, geneStatistic = y, minGenes = 5, maxGenes 
 mlpObject[1:10, ]
 # output changes with annotation version !
 
-plotGOgraph(object = mlpObject, ontology = "BP", annotation = "mouse4302mmentrezg")
+plotGOgraph(object = mlpObject)
 
 pdf(file = "test10.pdf", width = 10, height = 10)
 plot(mlpObject, nRow = 10) # by default:  type = "barplot"
@@ -96,3 +96,5 @@ if (FALSE){
 }
 
 plot(mlpObject, type = "quantileCurves")
+plot(mlpObject, type = "GOgraph")
+
