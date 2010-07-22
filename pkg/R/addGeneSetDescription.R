@@ -31,20 +31,20 @@ addGeneSetDescription <- function (object, geneSetSource = NULL){
     geneSetNames <- rownames(object)
     if (!all(geneSetNames %in% names(allGOTerms))) 
       stop("Check the geneSetSource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
-    returnValue <- data.frame(object, geneSetDescription = I(unlist(allGOTerms[geneSetNames])))
+    returnValue <- data.frame(object, geneSetDescription = unlist(allGOTerms[geneSetNames]), stringsAsFactors = FALSE)
   }
   if (any(geneSetSource %in% c("KEGG"))) {
     allKEGGterms <- as.list(KEGGPATHID2NAME)
     geneSetNames <- gsub("^[[:alpha:]]{3}", "", rownames(object))
     if (!all(geneSetNames %in% names(allKEGGterms))) 
       stop("Check the geneSetSource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
-    returnValue <- data.frame(object, geneSetDescription = I(unlist(allKEGGterms[geneSetNames])))
+    returnValue <- data.frame(object, geneSetDescription = unlist(allKEGGterms[geneSetNames]), stringsAsFactors = FALSE)
   }
   if (all(!(geneSetSource %in% c("GOBP", "GOMF", "GOCC", "KEGG")))) {
     if (!all(rownames(object) %in% geneSetSource$PATHWAYID)) 
       stop("Check the geneSetSource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
     idx <- match(rownames(object), geneSetSource$PATHWAYID)
-    returnValue <- data.frame(object, geneSetDescription = I(geneSetSource$PATHWAYNAME[idx]))
+    returnValue <- data.frame(object, geneSetDescription = geneSetSource$PATHWAYNAME[idx], stringsAsFactors = FALSE)
   }
   class(returnValue) <- c("MLP", class(returnValue))
   return(returnValue)
