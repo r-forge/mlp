@@ -47,9 +47,8 @@ First draft of MLP vignette document
 
 <<createGeneSets>>=
   geneSets <- getGeneSets(species = "Mouse", 
-		pathwaySource = "GOCC", 
-		eset = expressionSetGcrma
-)	
+		geneSetSource = "GOCC",
+    entrezIdentifiers = featureNames(expressionSetGcrma))
 @
 
 

@@ -1,3 +1,13 @@
+0.0-8
+   o add Dog species funcionality to getGeneSets (public GO and KEGG annotation only)
+   o getGeneSets: replace eset argument by EntrezIdentifiers argument
+   o use geneSetSource instead of pathwaySource for uniformity across 
+     all functions (most notably getGeneSets)
+   o plot(., type = "barplot") now allows for specifying colors for the bars
+     (barColors argument) and includes fix
+   o fix colors and legend for plot(., type = "GOgraph")
+   o added plotGeneSetSignificance
+   o impose character type for geneSetDescription in MLP output (instead of factor)
 0.0-7
    o add type = "GOgraph" to the plot method for MLP objects
    o rudimentary draft for vignette included

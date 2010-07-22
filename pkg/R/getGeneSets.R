@@ -4,39 +4,34 @@
 #' to serve as geneSet argument for the MLP function
 #' @param species character vector of length one indicating the species, one of
 #' 'Mouse', 'Human' or 'Rat'; defaults to 'Mouse'. 
-#' @param pathwaySource source to be used to construct the list of pathway categories; 
+#' @param geneSetSource source to be used to construct the list of pathway categories; 
 #' for public data sources, the user can specify a string (one of 'GOBP', 'GOMF', 'GOCC' or 'KEGG')
 #' and BioC packages will be used to construct the list of pathway categories; 
 #' for non-public data sources, the user can pass the pathway data as a dataframe with (at least) 
 #' the following four columns: PATHWAYID, TAXID, PATHWAYNAME and GENEID. It is assumed all columns
 #' are of type character.
-#' @param eset ExpressionSet object which will be used to subset the relevant Entrez ID identifiers
-#' in the relevant pathway category list components; the subset taken corresponds to the feature
-#' names of this ExpressionSet object
+#' @param entrezIdentifiers Entrez ID identifiers used to subset the relevant gene set
 #' @return object of class geneSetMLP which is essentially a named list of pathway categories. 
 #' Each list component contains a vector of Entrez IDs related to that particular pathway
 #' @import AnnotationDbi
 #' @export
-getGeneSets <- function (species = "Mouse", pathwaySource = NULL, eset) {
-  if (!species %in% c("Mouse", "Human", "Rat")) 
-    stop("The 'species' argument should be one of 'Mouse', 'Human' or 'Rat)")
-  
-  if (is.null(pathwaySource)) 
+getGeneSets <- function (species = "Mouse", geneSetSource = NULL, entrezIdentifiers) 
+{
+  if (!species %in% c("Mouse", "Human", "Rat", "Dog")) 
+    stop("The 'species' argument should be one of 'Mouse', 'Human', 'Rat' or 'Dog')")
+  if (is.null(geneSetSource)) 
     stop("Please provide a source of gene sets. For more info, see the help page.")
-  
-  if (!is.data.frame(pathwaySource) & all(!(pathwaySource %in% c("GOBP", "GOMF", "GOCC", "KEGG")))) 
-    stop("The 'pathwaySource' argument should be one of 'GOBP', 'GOMF', 'GOCC', 'KEGG' or a data.frame.  More info, see help.")
-  
-  if (is.data.frame(pathwaySource)) 
-    if (any(!(c("PATHWAYID", "TAXID", 
-              "PATHWAYNAME", "GENEID") %in% colnames(pathwaySource)))) 
-      stop("The pathwaySource as data.frame should have at least the 4 columns 'PATHWAYID', 'TAXID', 'PATHWAYNAME' and 'GENEID'. More info on their content, see help.")
-  
-  if (is.character(pathwaySource)){
-    
-    if (pathwaySource %in% c("GOBP", "GOMF", "GOCC")) {
+  if (!is.data.frame(geneSetSource) & all(!(geneSetSource %in% 
+            c("GOBP", "GOMF", "GOCC", "KEGG")))) 
+    stop("The 'geneSetSource' argument should be one of 'GOBP', 'GOMF', 'GOCC', 'KEGG' or a data.frame.  More info, see help.")
+  if (is.data.frame(geneSetSource)) 
+    if (any(!(c("PATHWAYID", "TAXID", "PATHWAYNAME", "GENEID") %in% 
+              colnames(geneSetSource)))) 
+      stop("The geneSetSource as data.frame should have at least the 4 columns 'PATHWAYID', 'TAXID', 'PATHWAYNAME' and 'GENEID'. More info on their content, see help.")
+  if (is.character(geneSetSource)) {
+    if (geneSetSource %in% c("GOBP", "GOMF", "GOCC")) {
       require(GO.db)
-      ontology <- sub("GO", "", pathwaySource)
+      ontology <- sub("GO", "", geneSetSource)
       switch(species, Mouse = {
             require(org.Mm.eg.db)
             geneSetToEntrez <- as.list(org.Mm.egGO2ALLEGS)
@@ -46,6 +41,9 @@ getGeneSets <- function (species = "Mouse", pathwaySource = NULL, eset) {
           }, Rat = {
             require(org.Rn.eg.db)
             geneSetToEntrez <- as.list(org.Rn.egGO2ALLEGS)
+          }, Dog = {
+            require(org.Cf.eg.db)
+            geneSetToEntrez <- as.list(org.Cf.egGO2ALLEGS)
           })
       switch(ontology, BP = {
             GOs <- names(as.list(GOBPANCESTOR))
@@ -54,12 +52,14 @@ getGeneSets <- function (species = "Mouse", pathwaySource = NULL, eset) {
           }, CC = {
             GOs <- names(as.list(GOCCANCESTOR))
           })
-      go <- geneSetToEntrez[names(geneSetToEntrez) %in% GOs]
+      go <- geneSetToEntrez[names(geneSetToEntrez) %in% 
+              GOs]
       geneSets <- lapply(go, unique)
-      anyGenesInGeneSet <- ifelse(unlist(lapply(geneSets, length)) > 
-              0, TRUE, FALSE)
+      anyGenesInGeneSet <- ifelse(unlist(lapply(geneSets, 
+                  length)) > 0, TRUE, FALSE)
       geneSets <- geneSets[anyGenesInGeneSet]
-    } else { # pathwaySource == "KEGG"
+    }
+    else {
       require(KEGG.db)
       geneSetToEntrez <- as.list(KEGGPATHID2EXTID)
       switch(species, Mouse = {
@@ -68,36 +68,38 @@ getGeneSets <- function (species = "Mouse", pathwaySource = NULL, eset) {
             prefix <- "hsa"
           }, Rat = {
             prefix <- "rno"
+          }, Dog = {
+            prefix <- "cfa"
           })
       geneSets <- geneSetToEntrez[grep(prefix, names(geneSetToEntrez))]
     }
-  } else { # data frame
+  }
+  else {
     switch(species, Mouse = {
           TAXID <- "10090"
         }, Human = {
           TAXID <- "9606"
         }, Rat = {
           TAXID <- "10116"
+        }, Dog = {
+          TAXID <- "9615"
         })
-    if (!(TAXID %in% pathwaySource$TAXID)) 
-      stop(paste("Please check the available TAXIDs in your pathwaySource. The pathwaySource object does not contain gene sets for ", 
+    if (!(TAXID %in% geneSetSource$TAXID)) 
+      stop(paste("Please check the available TAXIDs in your geneSetSource. The geneSetSource object does not contain gene sets for ", 
               species, sep = ""))
-    pathwaySource <- pathwaySource[pathwaySource$TAXID == 
+    geneSetSource <- geneSetSource[geneSetSource$TAXID == 
             TAXID, ]
-    geneSets <- by(pathwaySource$GENEID, INDICES = pathwaySource$PATHWAYID, 
+    geneSets <- by(geneSetSource$GENEID, INDICES = geneSetSource$PATHWAYID, 
         FUN = list)
     geneSets <- lapply(geneSets, as.character)
   }
-
-  entrezIds <- sub("_at", "", featureNames(eset))
-  # correct way (= not deleting genes for which there are no expression data) 
-  # which currently still gives an error when running MLP
-  tfidx <- sapply(geneSets, function(geneSet){sum(geneSet %in% entrezIds) > 0})
+  # entrezIds <- sub("_at", "", featureNames(eset))
+  tfidx <- sapply(geneSets, function(geneSet) {
+        sum(geneSet %in% entrezIdentifiers) > 0
+      })
   geneSets <- geneSets[tfidx]
-  # wrong way
-  #geneSets <- sapply(geneSets, function(x) x[x %in% entrezIds])
   attr(geneSets, "species") <- species
-  attr(geneSets, "pathwaySource") <- pathwaySource
+  attr(geneSets, "geneSetSource") <- geneSetSource
   class(geneSets) <- c("geneSetMLP", class(geneSets))
   return(geneSets)
 }

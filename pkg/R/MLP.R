@@ -30,10 +30,9 @@
 #' Bioinformatics, 23, 22, 3032-3038.
 #' @export
 MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100, 
-    rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
-    criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
-    df = 9, addGeneSetDescription = TRUE) 
-{
+        rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
+        criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
+        df = 9, addGeneSetDescription = TRUE){
   if (!inherits(geneSet, "geneSetMLP")) {
     stop("The 'geneSet' should be an object of class 'geneSetMLP' as produced by getGeneSets")
   }
@@ -48,10 +47,8 @@ MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100,
   if (!rowPermutations) {
     nPermutations <- ncol(geneStatistic) - 2
   }
-  
   totalGeneSetSize <- sapply(geneSet, length)
   geneSets <- sapply(geneSet, function(x) x[x %in% rownames(geneStatistic)])
-  
   geneSetSize <- sapply(geneSets, function(x) length(x))
   geneSetIndices <- which(geneSetSize >= minGenes & geneSetSize <= 
           maxGenes)
@@ -91,20 +88,21 @@ MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100,
   else {
     pw0 <- getIndividualPValues(w0, w)
   }
-  
   res <- data.frame(testedGeneSetSize = w0[, 1], geneSetStatistic = w0[, 
           2], geneSetPValue = pw0)
   res <- res[order(res$geneSetPValue), ]
-  res <- data.frame(totalGeneSetSize = totalGeneSetSize[rownames(res)], res)
+  res <- data.frame(totalGeneSetSize = totalGeneSetSize[rownames(res)], 
+      res)
   class(res) <- c("MLP", class(res))
-  if (addGeneSetDescription){
-    pathwaySource <- attr(geneSet, "pathwaySource")
-    res <- addGeneSetDescription(object = res, pathwaySource = pathwaySource)
+  if (addGeneSetDescription) {
+    geneSetSource <- attr(geneSet, "geneSetSource")
+    res <- addGeneSetDescription(object = res, geneSetSource = geneSetSource)
   }
   if (is.null(attr(res, "species"))) 
-    attr(res, "species") <- species 
-  attr(res, "pathwaySource") <- attr(geneSet, "pathwaySource")
-  if (!is.null(attr(pw0, "quantileCurveInformation")))
+    attr(res, "species") <- species
+  attr(res, "geneSetSource") <- attr(geneSet, "geneSetSource")
+  if (!is.null(attr(pw0, "quantileCurveInformation"))) 
     attr(res, "quantileCurveInformation") <- attr(pw0, "quantileCurveInformation")
   return(res)
 }
+

@@ -52,7 +52,7 @@ normDat.p <- fit2$p.value
 normDat.p[1:5]
 #[1] 0.4328583 0.7448996 0.6088859 0.1845008 0.2312761
 
-system.time(goGeneSet <- getGeneSets(species = "Mouse", pathwaySource = "GOBP", eset = expressionSetGcrma))
+system.time(goGeneSet <- getGeneSets(species = "Mouse", geneSetSource = "GOBP", entrezIdentifiers = featureNames(expressionSetGcrma)))
 goGeneSet[1:3]
 # output changes with annotation version !
 
@@ -83,13 +83,13 @@ unlink("test10.pdf")
 
 if (FALSE){
   pdf(file = "test5.pdf", width =10, height = 10)
-  mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10, descriptionLength = 5)
+  mlpBarplot(object = mlpObject, geneSetSource = "GOBP", nRow = 10, descriptionLength = 5)
   dev.off()
   
   unlink("test5.pdf")
   
   pdf(file = "test100.pdf", width =10, height = 20)
-  mlpBarplot(object = mlpObject, pathwaySource = "GOBP", nRow = 10, descriptionLength = 100)
+  mlpBarplot(object = mlpObject, geneSetSource = "GOBP", nRow = 10, descriptionLength = 100)
   dev.off()
   
   unlink("test100.pdf")
@@ -97,4 +97,3 @@ if (FALSE){
 
 plot(mlpObject, type = "quantileCurves")
 plot(mlpObject, type = "GOgraph")
-

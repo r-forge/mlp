@@ -4,9 +4,12 @@
 #' @param mainTitle main title of the graph; defaults to 'GO graph' 
 #' @return GO graph is plotted to the current device
 #' @export
-plotGOgraph <- function (object, nRow = 5, mainTitle = "GO graph") {
+plotGOgraph <- function (object, nRow = 5, mainTitle = "GO graph") 
+{
   if (!inherits(object, "MLP")) 
     stop("The 'object' argument should be an object of class 'MLP' as produced by the MLP function")
+  if (is.data.frame(attributes(object)$geneSetSource))
+    stop("Plotting a GO graph is only possible for MLP results based om geneSetSource 'GOBP', 'GOMF', or 'GOCC'")
   
   require(GO.db)
   require(Rgraphviz)
@@ -18,7 +21,7 @@ plotGOgraph <- function (object, nRow = 5, mainTitle = "GO graph") {
   require(annotate)
   
   goids <- rownames(object)[1:nRow]
-  ontology <- sub("GO", "", attributes(object)$pathwaySource)
+  ontology <- sub("GO", "", attributes(object)$geneSetSource)
   basicGraph <- GOGraph(goids, get(paste("GO", ontology, "PARENTS", 
               sep = "")))
   basicGraph <- removeNode("all", basicGraph)
@@ -29,7 +32,7 @@ plotGOgraph <- function (object, nRow = 5, mainTitle = "GO graph") {
   names(pvalues) <- nodes(basicGraph)
   pvalues <- pvalues[!is.na(pvalues)]
   pvalues[pvalues == 0] <- min(pvalues[pvalues != 0])/10
-  scores <- -log(pvalues)
+  scores <- -log10(pvalues)
   scores[scores <= 0.1] <- 0.1
   nColors <- round(max(scores) * 10)
   gocolors <- colorpanel(nColors, low = "lightyellow", high = "olivedrab")
@@ -70,5 +73,3 @@ plotGOgraph <- function (object, nRow = 5, mainTitle = "GO graph") {
               c(2, 5, 8)/10, ")", sep = ""), fill = gocolors[round(max(scores)) * 
               c(2, 5, 8)], cex = 0.7)
 }
-
-
