@@ -6,10 +6,14 @@
 #' @param qi TODO
 #' @param lqi TODO
 #' @param sym TODO defaults to TRUE
+#' @param main main title for the quantile curves plot; defaults to NULL; if NULL
+#' no title is added
 #' @return no return value; a quantile curve plot is drawn to the current device 
 #' @export
-plotQuantileCurves <- function(x0, y0, hqi, xtp, qi, lqi, sym = TRUE) {
-  plot(x0, y0, xlab = "n", ylab = "MLP", axes = FALSE, col = "#08306B", pch = ".")
+plotQuantileCurves <- function(x0, y0, hqi, xtp, qi, lqi, sym = TRUE, main = NULL) {
+  mainTitle <- if (is.null(main)) "" else main
+  plot(x0, y0, xlab = "n", ylab = "MLP", axes = FALSE, col = "#08306B", pch = ".",
+      main = mainTitle)
   axis(2, lwd = 1.5, col = "#08306B")
   atPositions <- axis(1, labels = FALSE)
   axis(1, lwd = 1.5, at = atPositions, labels = atPositions^2, las = 1, col = "#08306B")

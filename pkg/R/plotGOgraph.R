@@ -1,15 +1,17 @@
 #' Graphical Representation of GO Based MLP Results
 #' @param object object of class MLP (as produced by the MLP function) 
 #' @param nRow number of GO IDs for which to produce the plot
-#' @param mainTitle main title of the graph; defaults to 'GO graph' 
+#' @param main main title of the graph; defaults to 'GO graph' 
 #' @return GO graph is plotted to the current device
 #' @export
-plotGOgraph <- function (object, nRow = 5, mainTitle = "GO graph") 
-{
+plotGOgraph <- function (object, nRow = 5, main = "GO graph") {
+  
   if (!inherits(object, "MLP")) 
     stop("The 'object' argument should be an object of class 'MLP' as produced by the MLP function")
   if (is.data.frame(attributes(object)$geneSetSource))
     stop("Plotting a GO graph is only possible for MLP results based om geneSetSource 'GOBP', 'GOMF', or 'GOCC'")
+  
+  mainTitle <- match.arg(main)
   
   require(GO.db)
   require(Rgraphviz)

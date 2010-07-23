@@ -1,3 +1,8 @@
+0.0-9
+   o updated default grey scales for plot(., type = "barplot")
+   o default grey for plotGeneSetSignificance set to 'grey50'
+   o substantial improvement to vignette (An) 
+   o uniform use of 'main' argument for main titles in plot functions
 0.0-8
    o add Dog species funcionality to getGeneSets (public GO and KEGG annotation only)
    o getGeneSets: replace eset argument by EntrezIdentifiers argument

@@ -6,7 +6,7 @@
 #' @param annotationPackage name of the annotation package to be used (without .db extension);
 #'   character of length one
 #' @param barColors vector of colors to use for the bars of the barplot; defaults to NULL
-#'  in which case 'grey40' is used 
+#'  in which case 'grey50' is used 
 #' @return no return value 
 #' @export
 plotGeneSetSignificance <- function(geneSet, geneSetIdentifier, geneStatistic, annotationPackage, barColors = NULL){
@@ -34,7 +34,7 @@ plotGeneSetSignificance <- function(geneSet, geneSetIdentifier, geneStatistic, a
       sep = ":")
   names(genePvalues) <- substr(names(genePvalues), 1, 60)
   
-  barColors <- if (is.null(barColors)) "grey40" else barColors
+  barColors <- if (is.null(barColors)) "grey50" else barColors
   
   barplot(-log10(genePvalues), xlab = "", 
       main = paste("Significance of tested genes involved in gene set", geneSetIdentifier), 

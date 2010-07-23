@@ -13,24 +13,27 @@
 #' @seealso barplot
 #' @export
 mlpBarplot <- function (object, nRow = 20, barColors = NULL, main = NULL) {
+  
   if (!inherits(object, "MLP")) 
     stop("'object' should be an object of class 'MLP' as produced by the MLP function")
+  
   geneSetSource <- attr(object, "geneSetSource")
   mlpResults <- head(object, nRow)
   dat <- -log10(mlpResults$geneSetPValue)
   names(dat) <- rownames(mlpResults)
+  
   if (is.null(barColors)){
     barColors <- rep("grey", length(dat))
-#   barColors[1:5] <- c("grey10", "grey20", "grey30", "grey40", 
-#       "grey50")
     percentTested <- 100*(object$testedGeneSetSize/object$totalGeneSetSize)
     percentTested <- percentTested[1:length(dat)]
-    barColors[percentTested >= 75] <- "grey20"
-    barColors[percentTested < 75 & percentTested > 50] <- "grey30"
-    barColors[percentTested <= 50] <- "grey40"
+    
+    barColors[percentTested >= 75] <- "grey50"
+    barColors[percentTested < 75 & percentTested > 50] <- "grey60"
+    barColors[percentTested <= 50] <- "grey70"
   } else {
     barColors <- barColors
   }
+  
   if (is.null(object$geneSetDescription)) {
     if (geneSetSource %in% c("GOBP", "GOMF", "GOCC")) {
       allGOTerms <- as.list(Term(GOTERM))
