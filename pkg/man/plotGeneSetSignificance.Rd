@@ -12,4 +12,4 @@ character of length one}
 \item{annotationPackage}{name of the annotation package to be used (without .db extension);
 character of length one}
 \item{barColors}{vector of colors to use for the bars of the barplot; defaults to NULL
-in which case 'grey40' is used}}
+in which case 'grey50' is used}}

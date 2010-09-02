@@ -18,7 +18,7 @@
 #' @param nPermutations is the number of simulations. By default 100 permutations are conducted.
 #' @param smoothPValues logical indicating whether one wants to calculate smoothed cut-off thresholds (TRUE; default)
 #'    or not (FALSE).
-#' @param criticalValues vector of quantiles at which p values for each gene set are desired
+#' @param probabilityVector vector of quantiles at which p values for each gene set are desired
 #' @param df degrees of freedom for the smooth.spline function used in getSmoothedPValues 
 #' @param addGeneSetDescription logical indicating whether a column with the gene set description be added to
 #' the output data frame; defaults to TRUE.
@@ -31,7 +31,7 @@
 #' @export
 MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100, 
         rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 
-        criticalValues = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
+        probabilityVector = c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), 
         df = 9, addGeneSetDescription = TRUE){
   if (!inherits(geneSet, "geneSetMLP")) {
     stop("The 'geneSet' should be an object of class 'geneSetMLP' as produced by getGeneSets")
@@ -82,7 +82,7 @@ MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100,
     if (!rowPermutations) {
       warning("Cannot smooth p-values if ind.sim = FALSE")
     }
-    pw0 <- getSmoothedPValues(w0, w[, -1], q.cutoff = criticalValues, 
+    pw0 <- getSmoothedPValues(w0, w[, -1], q.cutoff = probabilityVector, 
         df = df)
   }
   else {

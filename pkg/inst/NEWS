@@ -1,3 +1,7 @@
+0.0-10
+   o updated vignette
+   o change argument criticalValues of the MLP function to probabilityVector
+   o trivial change example data set
 0.0-9
    o updated default grey scales for plot(., type = "barplot")
    o default grey for plotGeneSetSignificance set to 'grey50'
