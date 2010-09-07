@@ -25,8 +25,10 @@ plotGeneSetSignificance <- function(geneSet, geneSetIdentifier, geneStatistic, a
   entrezids <- entrezids[entrezids %in% names(geneStatistic)]
   genePvalues <- geneStatistic[entrezids]
   genePvalues <- sort(genePvalues)
-  if (length(grep("_at", names(pvalues))) == 0){
-    psids <- paste(names(genePvalues), "_at", sep = "")
+  psids <- if (length(grep("_at", names(genePvalues))) == 0){
+    paste(names(genePvalues), "_at", sep = "")
+  } else {
+    names(genePvalues)
   }
   names(genePvalues) <- paste(
       unlist(lookUp(psids, annotationPackage, "SYMBOL")),

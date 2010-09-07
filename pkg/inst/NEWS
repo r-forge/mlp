@@ -1,3 +1,6 @@
+0.0-11
+   o fix in plotGeneSetSignificance (psids)
+   o typo NEWS file
 0.0-10
    o updated vignette
    o change argument criticalValues of the MLP function to probabilityVector
@@ -9,7 +12,7 @@
    o uniform use of 'main' argument for main titles in plot functions
 0.0-8
    o add Dog species funcionality to getGeneSets (public GO and KEGG annotation only)
-   o getGeneSets: replace eset argument by EntrezIdentifiers argument
+   o getGeneSets: replace eset argument by entrezIdentifiers argument
    o use geneSetSource instead of pathwaySource for uniformity across 
      all functions (most notably getGeneSets)
    o plot(., type = "barplot") now allows for specifying colors for the bars
