@@ -1,17 +1,17 @@
 #' Graphical Representation of GO Based MLP Results
 #' @param object object of class MLP (as produced by the MLP function) 
 #' @param nRow number of GO IDs for which to produce the plot
-#' @param main main title of the graph; defaults to 'GO graph' 
+#' @param main main title of the graph; if NULL (default) the main title is set to 'GO graph' 
 #' @return GO graph is plotted to the current device
 #' @export
-plotGOgraph <- function (object, nRow = 5, main = "GO graph") {
+plotGOgraph <- function (object, nRow = 5, main = NULL) {
   
   if (!inherits(object, "MLP")) 
     stop("The 'object' argument should be an object of class 'MLP' as produced by the MLP function")
   if (is.data.frame(attributes(object)$geneSetSource))
     stop("Plotting a GO graph is only possible for MLP results based om geneSetSource 'GOBP', 'GOMF', or 'GOCC'")
   
-  mainTitle <- match.arg(main)
+  main <- if (is.null(main)) "Go graph" else main
   
   require(GO.db)
   require(Rgraphviz)
@@ -68,7 +68,7 @@ plotGOgraph <- function (object, nRow = 5, main = "GO graph") {
   nodeRenderInfo(basicGraph) <- list(cex = 0.5)
   nodeRenderInfo(basicGraph) <- list(lWidth = 60)
   nodeRenderInfo(basicGraph) <- list(labelJust = "c")
-  graphRenderInfo(basicGraph)$main <- mainTitle
+  graphRenderInfo(basicGraph)$main <- main
   renderGraph(basicGraph)
   smartlegend("right", "bottom", legend = paste(c(" least", 
               " medium", " most"), " (scores ", round(max(scores)) * 

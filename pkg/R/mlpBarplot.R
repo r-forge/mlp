@@ -35,34 +35,31 @@ mlpBarplot <- function (object, nRow = 20, barColors = NULL, main = NULL) {
   }
   
   if (is.null(object$geneSetDescription)) {
-    if (geneSetSource %in% c("GOBP", "GOMF", "GOCC")) {
-      allGOTerms <- as.list(Term(GOTERM))
-      if (!all(names(dat) %in% names(allGOTerms))) 
+    if (is.data.frame(geneSetSource)) {
+      if (!all(rownames(object) %in% geneSetSource$PATHWAYID)) 
         stop("Check the geneSetSource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
-      descr <- allGOTerms[names(dat)]
-    }
-    else {
-      if (geneSetSource == "KEGG") {
-        allKEGGterms <- as.list(KEGGPATHID2NAME)
-        geneSetNames <- gsub("^[[:alpha:]]{3}", "", names(dat))
-        if (!all(geneSetNames %in% names(allKEGGterms))) 
+      idx <- match(names(dat), geneSetSource$PATHWAYID)
+      descr <- geneSetSource$PATHWAYNAME[idx]
+    } else {
+      if (geneSetSource %in% c("GOBP", "GOMF", "GOCC")) {
+        allGOTerms <- as.list(Term(GOTERM))
+        if (!all(names(dat) %in% names(allGOTerms))) 
           stop("Check the geneSetSource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
-        descr <- allKEGGterms[geneSetNames]
-      }
-      else {
-        if (!(geneSetSource %in% c("GOBP", "GOMF", "GOCC", 
-                  "KEGG"))) {
-          if (!all(rownames(object) %in% geneSetSource$PATHWAYID)) 
+        descr <- allGOTerms[names(dat)]
+      } else {
+        if (geneSetSource == "KEGG") {
+          allKEGGterms <- as.list(KEGGPATHID2NAME)
+          geneSetNames <- gsub("^[[:alpha:]]{3}", "", names(dat))
+          if (!all(geneSetNames %in% names(allKEGGterms))) 
             stop("Check the geneSetSource parameter and compare it to the one used in the getGeneSets function, they should be the same!")
-          idx <- match(names(dat), geneSetSource$PATHWAYID)
-          descr <- geneSetSource$PATHWAYNAME[idx]
+          descr <- allKEGGterms[geneSetNames]
         }
       }
     }
+  } else {
+     descr <- mlpResults$geneSetDescription
   }
-  else {
-    descr <- mlpResults$geneSetDescription
-  }
+
   descriptionLength <- 60
   descr <- substr(descr, 1, descriptionLength)
   names(dat) <- paste(descr, " (", mlpResults$testedGeneSetSize, 
@@ -72,9 +69,9 @@ mlpBarplot <- function (object, nRow = 20, barColors = NULL, main = NULL) {
   mp <- barplot(dat, xlab = "", main = "", border = "white", 
       las = 3, ylab = "", col = barColors)
   if (is.null(main)) {
-    if (!(geneSetSource %in% c("GOBP", "GOMF", "GOCC", "KEGG"))){
+    if (is.data.frame(geneSetSource)){ # external data
       mainTitle <- "Effect of the treatment on the gene sets"
-    } else {
+    } else { # geneSetSource %in% c("GOBP", "GOMF", "GOCC", "KEGG")
       mainTitle <- paste("Effect of the treatment on", geneSetSource, "gene sets")
     }
   } else {

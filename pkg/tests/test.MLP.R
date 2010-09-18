@@ -73,9 +73,10 @@ mlpObject <- MLP(geneSet = goGeneSet, geneStatistic = y, minGenes = 5, maxGenes 
 mlpObject[1:10, ]
 # output changes with annotation version !
 
-plotGOgraph(object = mlpObject)
+plotGOgraph(object = mlpObject, main = "test of main")
 
 pdf(file = "test10.pdf", width = 10, height = 10)
+# x11(width = 10, height = 10)
 plot(mlpObject, nRow = 10) # by default:  type = "barplot"
 dev.off()
 
