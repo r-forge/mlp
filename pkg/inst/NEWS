@@ -1,3 +1,5 @@
+0.0-13
+   o comply with R 2.12.x
 0.0-12
    o fix main title handling in plotGOgraph
    o fix main title handling for mlpBarplot in case the geneSetSource are external data (data frame)

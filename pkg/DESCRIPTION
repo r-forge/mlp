@@ -1,16 +1,16 @@
 Package: MLP
 Type: Package
 Title: MLP
-Version: 0.0-12
+Version: 0.0-13
 Date: 2010-09-18
 Author: Nandini Raghavan, Tobias Verbeke, An De Bondt with
     contributions by Javier Cabrera, Dhammika Amaratunga, Tine Casneuf
-Maintainer: Nandini Raghavan <nraghava@its.jnj.com>
+Maintainer: Tobias Verbeke <tobias.verbeke@openanalytics.eu>
 Description: Mean Log P Analysis
 Depends: AnnotationDbi, affy, plotrix
 Suggests: GO.db, org.Hs.eg.db, org.Mm.eg.db, org.Rn.eg.db,
     org.Cf.eg.db, KEGG.db, annotate, GOstats, annotate, Rgraphviz,
-    gplots, gmodels, gdata, gtools, GOstats
+    gplots, gmodels, gdata, gtools, GOstats, limma
 License: GPL-3
 Collate: 'addGeneSetDescription.R' 'getGeneSets.R' 'mlpBarplot.R'
     'MLP.R' 'plotGeneSetSignificance.R' 'plotGOgraph.R' 'plot.MLP.R'
