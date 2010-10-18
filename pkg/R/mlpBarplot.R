@@ -11,6 +11,12 @@
 #' @return the midpoints of all the bars are returned invisibly (using the conventions of barplot); 
 #'   an MLP-specific barplot is drawn to the current device;  
 #' @seealso barplot
+#' @examples pathExampleMLPResult <- system.file("exampleFiles", "exampleMLPResult.rda", package = "MLP")
+#' load(pathExampleMLPResult)
+#' dev.new(width = 10, height = 10)
+#' op <- par(mar = c(30, 10, 6, 2))
+#' mlpBarplot(exampleMLPResult)
+#' par(op)
 #' @export
 mlpBarplot <- function (object, nRow = 20, barColors = NULL, main = NULL) {
   

@@ -31,6 +31,7 @@ mlpStatistic <- function(geneSetPValues){
 #'   (e.g. wild-type vs. knock-out) ; used for column permutations only
 #' @param n TODO
 #' @param k TODO
+#' @nord
 permtwo = function (n, k) 
 {
   ### From Javier 1/27/2006
@@ -55,7 +56,7 @@ permtwo = function (n, k)
 #' Calculate all permutations
 #' (used for column permutations)
 #' @param gr TODO
-#' @export
+#' @nord
 permk <- function(gr) 
 {
   ### From Javier 1/27/2006
@@ -98,7 +99,7 @@ mapGeneSetStatistic <- function(geneSet, geneStatistic){
 #' @param xp input table of gene sets, probe.ids, and gene.ids, in that order.
 #' @param yp input table of probe.ids and original and permuted probeset-statistics.
 #' @return TODO fill out 
-#' @export
+#' @nord
 pp2g <- function(xp, yp){
   
   x1  <- xp[, 1]

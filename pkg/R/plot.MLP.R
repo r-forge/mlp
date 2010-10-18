@@ -5,6 +5,16 @@
 #' @param ... further arguments for the plot functions for each type 
 #' @return for type = "barplot", the midpoints of the barplot 
 #' @S3method plot MLP
+#' @examples pathExampleMLPResult <- system.file("exampleFiles", "exampleMLPResult.rda", package = "MLP")
+#' load(pathExampleMLPResult)
+#' dev.new(width = 10, height = 10)
+#' op <- par(mar = c(30, 10, 6, 2))
+#' plot(exampleMLPResult, type = "barplot")
+#' par(op)
+#' plot(exampleMLPResult, type = "quantileCurves")
+#' if (require(GO.db) && require(Rgraphviz)){
+#'   plot(exampleMLPResult, type = "GOgraph")
+#' }
 #' @export
 plot.MLP <- function(x, y = NULL, type = c("barplot", "GOgraph", "quantileCurves") , ...){
   type <- match.arg(type)

@@ -25,9 +25,20 @@
 #' @return data frame with four (or five) columns: totalGeneSetSize, testedGeneSetSize, geneSetStatistic and geneSetPValue
 #' and (if addDescription is set to TRUE) geneSetDescription; the rows of the data frame are ordered by 
 #' ascending geneSetPValue.
-#'
 #' @references Raghavan, Nandini et al. (2007). The high-level similarity of some disparate gene expression measures,
 #' Bioinformatics, 23, 22, 3032-3038.
+#' @examples 
+#' if (require(GO.db)){
+#'   pathExampleGeneSet <- system.file("exampleFiles", "exampleGeneSet.rda", package = "MLP")
+#'   pathExamplePValues <- system.file("exampleFiles", "examplePValues.rda", package = "MLP")
+#'   load(pathExampleGeneSet)
+#'   load(pathExamplePValues)
+#'   head(examplePValues)
+#'   head(exampleGeneSet)
+#'   mlpResult <- MLP(geneSet = exampleGeneSet, geneStatistic = examplePValues)
+#'   head(mlpResult)
+#' }
+#' 
 #' @export
 MLP <- function (geneSet, geneStatistic, minGenes = 5, maxGenes = 100, 
         rowPermutations = TRUE, nPermutations = 100, smoothPValues = TRUE, 

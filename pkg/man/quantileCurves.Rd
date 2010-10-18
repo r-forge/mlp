@@ -1,8 +1,9 @@
 \name{quantileCurves}
 \alias{quantileCurves}
 \title{Function used to calculate the quantile curves; the function is mainly used by ctpval1...}
-\usage{quantileCurves(x, y, x0=x, y0=y, type=c("none", "dec", "inc"), m=20,
-    lqi=0.05, hqi=0.95, sym=FALSE, flag=FALSE, df=15, logtran=FALSE)}
+\usage{quantileCurves(x, y, x0=x, y0=y, type=c("none", "dec", "inc"), m=20, lqi=0.05,
+    hqi=0.95, sym=FALSE, flag=FALSE, df=15, logtran=FALSE)
+}
 \description{Function used to calculate the quantile curves; the function is mainly used by ctpval1}
 \value{matrix with the y0 values in the first column, the quantiles at x0 (as many columns as is specified in lqi and hqi) 
 and the x0 values in the last column}
@@ -22,4 +23,6 @@ be symmetric, so the argument defaults to FALSE.}
 but less accurate for large datasets than when using the apply function; defaults to FALSE.}
 \item{df}{degrees of freedom for the smoothing spline}
 \item{logtran}{whether whether or not to log-transform the x's and y's to calculate the smoothed
-quantile curves}}
+quantile curves}
+}
+

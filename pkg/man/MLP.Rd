@@ -1,10 +1,11 @@
 \name{MLP}
 \alias{MLP}
 \title{This function calculates p-values for each gene set based on row permutations...}
-\usage{MLP(geneSet, geneStatistic, minGenes=5, maxGenes=100,
-    rowPermutations=TRUE, nPermutations=100, smoothPValues=TRUE,
-    probabilityVector=c(0.5, 0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999),
-    df=9, addGeneSetDescription=TRUE)}
+\usage{MLP(geneSet, geneStatistic, minGenes=5, maxGenes=100, rowPermutations=TRUE,
+    nPermutations=100, smoothPValues=TRUE, probabilityVector=c(0.5,
+    0.9, 0.95, 0.99, 0.999, 0.9999, 0.99999), df=9,
+    addGeneSetDescription=TRUE)
+}
 \description{This function calculates p-values for each gene set based on row permutations
 of the gene p values or column permutations of the expression matrix; the p values
 can be obtained either as individual gene set p values or p values based on smoothing
@@ -33,4 +34,16 @@ or not (FALSE).}
 \item{probabilityVector}{vector of quantiles at which p values for each gene set are desired}
 \item{df}{degrees of freedom for the smooth.spline function used in getSmoothedPValues}
 \item{addGeneSetDescription}{logical indicating whether a column with the gene set description be added to
-the output data frame; defaults to TRUE.}}
+the output data frame; defaults to TRUE.}
+}
+\examples{if (require(GO.db)){
+pathExampleGeneSet <- system.file("exampleFiles", "exampleGeneSet.rda", package = "MLP")
+pathExamplePValues <- system.file("exampleFiles", "examplePValues.rda", package = "MLP")
+load(pathExampleGeneSet)
+load(pathExamplePValues)
+head(examplePValues)
+head(exampleGeneSet)
+mlpResult <- MLP(geneSet = exampleGeneSet, geneStatistic = examplePValues)
+head(mlpResult)
+}}
+

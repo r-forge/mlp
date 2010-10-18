@@ -8,8 +8,10 @@
 #' @param sym TODO defaults to TRUE
 #' @param main main title for the quantile curves plot; defaults to NULL; if NULL
 #' no title is added
-#' @return no return value; a quantile curve plot is drawn to the current device 
-#' @export
+#' @return no return value; a quantile curve plot is drawn to the current device
+#' @examples pathExampleMLPResult <- system.file("exampleFiles", "exampleMLPResult.rda", package = "MLP")
+#' load(pathExampleMLPResult)
+#' @nord
 plotQuantileCurves <- function(x0, y0, hqi, xtp, qi, lqi, sym = TRUE, main = NULL) {
   mainTitle <- if (is.null(main)) "" else main
   plot(x0, y0, xlab = "n", ylab = "MLP", axes = FALSE, col = "#08306B", pch = ".",

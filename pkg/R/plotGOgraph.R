@@ -3,6 +3,11 @@
 #' @param nRow number of GO IDs for which to produce the plot
 #' @param main main title of the graph; if NULL (default) the main title is set to 'GO graph' 
 #' @return GO graph is plotted to the current device
+#' @examples if (require(GO.db) && require(Rgraphviz)){
+#'   pathExampleMLPResult <- system.file("exampleFiles", "exampleMLPResult.rda", package = "MLP")
+#'   load(pathExampleMLPResult)
+#'   plotGOgraph(exampleMLPResult, main = "GO Graph")
+#' }
 #' @export
 plotGOgraph <- function (object, nRow = 5, main = NULL) {
   

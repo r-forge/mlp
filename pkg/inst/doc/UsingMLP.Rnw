@@ -78,12 +78,20 @@ based on Entrez Gene probeset definitions
 Load the needed libraries and the preprocessed data.
 
 <<loadData>>=
-  require(plotrix)
   require(MLP)
   require(limma)
   pathExampleData <- system.file("exampleFiles", "expressionSetGcrma.rda", package = "MLP")
   load(pathExampleData)
+  if (!require(mouse4302mmentrezg.db))
+    annotation(expressionSetGcrma) <- "mouse4302"
 @  
+
+It is advisable to make use of the annotation packages of the BrainArray 
+group\footnote{See \href{http://brainarray.mbni.med.umich.edu/Brainarray/Database/CustomCDF/genomic_curated_CDF.asp}{here}.}
+at the University of Michigan, but as these packages are unfortunately 
+not officially part of BioConductor (and on the build servers used to build
+packages [and corresponding vignettes]), the code above allows for using
+the sub-optimal Affymetrix annotation. 
 
 \subsection{Prepare P Values}
 
@@ -330,13 +338,14 @@ The \texttt{plotGeneSetSignificance} function needs 4 parameters and there is al
 <<geneSignificance>>=
 geneSetID <- rownames(mlpOut)[1]
 pdf("geneSignificance.pdf", width = 10, height = 10)
-par(mar = c(25, 10, 6, 2))
+op <- par(mar = c(25, 10, 6, 2))
 plotGeneSetSignificance(
 		geneSet = geneSet, 
 		geneSetIdentifier = geneSetID, 
 		geneStatistic = pvalues, 
 		annotationPackage = annotation(expressionSetGcrma),
 )
+par(op)
 dev.off()	
 @
 
@@ -382,6 +391,6 @@ The high-level similarity of some disparate gene expression measures.
 
 Raghavan N, Amaratunga D, Cabrera J, Nie A, Qin J, McMillian M.
 On methods for gene function scoring as a means of facilitating the interpretation of microarray results.
-\emph{J Comput Biol}. 2006 Apr ;13(3):798-809.PMID: 16706726
+\emph{J Comput Biol}. 2006 Apr; 13(3):798-809.PMID: 16706726
 
 \end{document}

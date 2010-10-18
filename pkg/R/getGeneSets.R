@@ -14,6 +14,14 @@
 #' @return object of class geneSetMLP which is essentially a named list of pathway categories. 
 #' Each list component contains a vector of Entrez IDs related to that particular pathway
 #' @import AnnotationDbi
+#' @examples if (require(GO.db) && require(org.Mm.eg.db)){
+#'   pathExampleData <- system.file("exampleFiles", "expressionSetGcrma.rda", package = "MLP")
+#'   pathExamplePValues <- system.file("exampleFiles", "examplePValues.rda", package = "MLP")
+#'   load(pathExampleData)
+#'   load(pathExamplePValues)
+#'   geneSet <- getGeneSets(species = "Mouse", geneSetSource = "GOBP", entrezIdentifiers = names(examplePValues)[1:2000])
+#'   head(geneSet)
+#' }
 #' @export
 getGeneSets <- function (species = "Mouse", geneSetSource = NULL, entrezIdentifiers) 
 {

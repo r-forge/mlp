@@ -1,7 +1,8 @@
 \name{addGeneSetDescription}
 \alias{addGeneSetDescription}
 \title{Utility function which adds the biological description of the gene sets as...}
-\usage{addGeneSetDescription(object, geneSetSource)}
+\usage{addGeneSetDescription(object, geneSetSource)
+}
 \description{Utility function which adds the biological description of the gene sets as
 a column to the return value of the MLP function (data frame)}
 \value{the data frame as returned by MLP enriched with an additional column geneSetDescription, providing
@@ -14,4 +15,6 @@ and BioC packages will be used to construct the list of pathway categories;
 for non-public data sources, the user can pass the pathway data as a dataframe with (at least) 
 the following four columns: PATHWAYID, TAXID, PATHWAYNAME and GENEID. It is assumed all columns
 are of type character. The 'geneSetSource' argument should be the same as the argument
-provided to the getGeneSets function; defaults to NULL}}
+provided to the getGeneSets function; defaults to NULL}
+}
+
