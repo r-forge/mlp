@@ -1,7 +1,7 @@
 #' Compute column means of minus log10 of the data
 #' @param x matrix
 #' @return vector of column means of -log10(x) 
-#' @export
+#' @nord
 computeMLP <- function(x){
   x <- as.matrix(x)
   if (ncol(x) > 1){
@@ -21,7 +21,7 @@ computeMLP <- function(x){
 #'   respectively
 #' @return data frame with two columns; first column contains the number of genes
 #'    in the gene set; the second column contains the MLP statistic (u) for the gene set.
-#' @export
+#' @nord
 mlpStatistic <- function(geneSetPValues){
   retval <- sapply(geneSetPValues, computeMLP)
   return(retval)
@@ -82,7 +82,7 @@ permk <- function(gr)
 #'   corresponding to its gene identifier
 #' @return list of gene sets; each component of the list (gene set) is a numeric vector of p values; the names
 #'   of the numeric vector are the gene identifiers corresponding to the p values
-#' @export 
+#' @nord 
 mapGeneSetStatistic <- function(geneSet, geneStatistic){
   myfun <- function(x){
     rv <- geneStatistic[row.names(geneStatistic) %in% x, ]
@@ -148,7 +148,7 @@ pp2g <- function(xp, yp){
 #' @param permutationGeneSetStats output of MLP except for the gene set size column; 
 #'   matrix of gene set statistics based on the permutation procedure
 #' @return vector of p values for each gene set
-#' @export
+#' @nord
 getIndividualPValues <- function(observedGeneSetStats, permutationGeneSetStats){
   # individual cut-offs
   w1 <- matrix(rep(observedGeneSetStats[, 2], ncol(permutationGeneSetStats)), nrow = nrow(observedGeneSetStats), ncol = ncol(permutationGeneSetStats))
@@ -167,7 +167,7 @@ getIndividualPValues <- function(observedGeneSetStats, permutationGeneSetStats){
 #'   specified by the users)
 #' @param df degrees of freedom used for the smoothing splines used to calculate the smoothed quantile curves; defaults to 9.  
 #' @return vector of p values for each gene set
-#' @export
+#' @nord
 getSmoothedPValues <- function(observedGeneSetStats, permutationGeneSetStats, q.cutoff, df = 9){
   ### This imposes the decreasing criterion and has df =9
   w1 <- cbind(rep(observedGeneSetStats[,1], ncol(permutationGeneSetStats[,])), 
@@ -204,7 +204,7 @@ getSmoothedPValues <- function(observedGeneSetStats, permutationGeneSetStats, q.
 #'   quantile curves
 #' @return matrix with the y0 values in the first column, the quantiles at x0 (as many columns as is specified in lqi and hqi) 
 #'   and the x0 values in the last column
-#' @export 
+#' @nord 
 quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"), m = 20, lqi = 0.05, hqi = 0.95,
     sym = FALSE, flag = FALSE, df = 15, logtran = FALSE) {
   
@@ -316,7 +316,7 @@ quantileCurves <- function(x, y, x0 = x, y0 = y, type = c("none", "dec", "inc"),
 #' @param decreasing logical; if TRUE, specifies the curve to be non-increasing, if FALSE specifies the
 #'   curve to be non-decreasing
 #' @return vector of y values with the monotonicity constraint imposed
-#' @export
+#' @nord
 smdecreasing1 <- function(z, w, decreasing = TRUE) {
   
   x <- z$x
@@ -345,7 +345,7 @@ smdecreasing1 <- function(z, w, decreasing = TRUE) {
 #' Function for column sorting of a matrix x
 #' @param x matrix
 #' @return sorted matrix 
-#' @export
+#' @nord
 csort <- function(x) { 
   n  <- nrow(x)
   p  <- ncol(x)
@@ -361,7 +361,7 @@ csort <- function(x) {
 #' @param x.ct output of quantileCurves, i.e. the curves of the contours for the different quantiles 
 #' @param q.cutoff critical values
 #' @return actual p values for each gene set
-#' @export
+#' @nord
 ctpval1 <- function(x.ct, q.cutoff) {
   p <- ncol(x.ct) 
   pr <- 2:(p-1)

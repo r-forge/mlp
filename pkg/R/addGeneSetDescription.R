@@ -10,8 +10,8 @@
 #' provided to the getGeneSets function; defaults to NULL 
 #' @return the data frame as returned by MLP enriched with an additional column geneSetDescription, providing
 #' a concise description of the gene set
-#' @seealso \link{MLP}
-#' @export
+#' @seealso \link{MLP} 
+#' @nord
 addGeneSetDescription <- function (object, geneSetSource = NULL){
   if (!inherits(object, "MLP")) 
     stop("'object' should be an object of class 'MLP' as produced by the MLP function")
